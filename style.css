@@ -2140,6 +2140,33 @@ h2 {
     padding: 0 14px;
     border: 2px solid #F3C3BB;
     border-radius: 22px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 16px;
+}
+
+#authArea button {
+    width: 100%;
+    max-width: 320px;
+    height: 44px;
+    border: none;
+    border-radius: 22px;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* ログインを目立たせて、新規登録はひかえめに */
+#loginButton {
+    background: #B5574A;
+    color: #FFFFFF;
+}
+
+#signupButton {
+    background: #FFFFFF;
+    color: #8a4a40;
+    border: 1px solid #E8A79C;
 }
 
 /* ---------- 自分のボトルの画面を1画面に収める ---------- */

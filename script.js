@@ -968,7 +968,7 @@ async function loadEveryone() {
     if (unlocked && newTasks.length > 0) {
       side.classList.add("glow");
     }
-    side.appendChild(makeSmallBottle(profile.bottle_color, theirTasks));
+       side.appendChild(makeSmallBottle(profile.bottle_color, theirTasks, decoOf(profile)));
     side.addEventListener("click", function () {
       if (!unlocked) {
         alert("この日の自分のリストを書くと見られるよ！");
@@ -2698,7 +2698,7 @@ async function loadWishes() {
       if (original) {
         const from = document.createElement("div");
         from.className = "wish-rewish";
-        from.textContent = "🔁 " + nicknameOf(original.user_id) + " さんのやりたいことをリウィッシュ";
+        from.textContent = "⇄" + nicknameOf(original.user_id) + " さんのやりたいことをリウィッシュ";
         li.appendChild(from);
       }
     }
@@ -2767,7 +2767,7 @@ async function loadWishes() {
     if (rewishUsers.length > 0) {
       const rewishPeople = document.createElement("div");
       rewishPeople.className = "wish-people";
-      rewishPeople.textContent = "🔁 " + peopleText(rewishUsers);
+      rewishPeople.textContent = "⇄" + peopleText(rewishUsers);
       li.appendChild(rewishPeople);
     }
 
