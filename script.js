@@ -135,6 +135,8 @@ const openNotificationSettings = document.getElementById("openNotificationSettin
 const myPageBottle = document.getElementById("myPageBottle");
 const myStats = document.getElementById("myStats");
 const myCodeText = document.getElementById("myCodeText");
+const pastBottles = document.getElementById("pastBottles");
+const pastEmpty = document.getElementById("pastEmpty");
 
 let chosenBottle = null;
 let tasks = [];    
@@ -1261,6 +1263,85 @@ mineTab.addEventListener("click", function () {
   setViewMode("mine");
 });
 
+// これまでのボトル（きのうから30日前まで）を並べる。満タンの日の数を返す
+async function loadPastBottles() {
+  const from = new Date();
+  from.setDate(from.getDate() - 30);
+  const today = toDateString(new Date());
+
+  const { data: rows, error } = await db
+    .from("tasks")
+    .select("task_date, category, done, completed_at")
+    .eq("user_id", currentUser.id)
+    .gte("task_date", toDateString(from))
+    .lt("task_date", today);
+
+  pastBottles.innerHTML = "";
+  if (error || rows.length === 0) {
+    pastEmpty.hidden = false;
+    return 0;
+  }
+  pastEmpty.hidden = true;
+
+  // 日付ごとに分ける { "2026-11-04": [タスク, タスク], ... }
+  const days = {};
+  rows.forEach(function (row) {
+    if (!days[row.task_date]) {
+      days[row.task_date] = [];
+    }
+    days[row.task_date].push(row);
+  });
+
+  // 新しい日を左に
+  const dates = Object.keys(days).sort().reverse();
+
+  const bottleRow = document.createElement("div");
+  bottleRow.className = "past-row";
+  const board = document.createElement("div");
+  board.className = "shelf-board";
+  const dateRow = document.createElement("div");
+  dateRow.className = "past-row";
+
+  let fullDays = 0;
+
+  dates.forEach(function (date) {
+    const dayTasks = days[date];
+    const isFull = dayTasks.every(function (t) {
+      return t.done;
+    });
+    if (isFull) {
+      fullDays = fullDays + 1;
+    }
+
+    // ボトル（満タンなら光る）
+    const button = document.createElement("button");
+    button.className = "shelf-bottle past-bottle";
+    if (isFull) {
+      button.classList.add("glow");
+    }
+    button.appendChild(makeSmallBottle(myBottleColor, dayTasks));
+
+    // タップ → その日の自分のリストへ
+    button.addEventListener("click", function () {
+      changeDate(date);
+      showSection("daily");
+      homeView.hidden = true;
+      mineView.hidden = false;
+    });
+    bottleRow.appendChild(button);
+
+    // 日付「11/4」
+    const label = document.createElement("span");
+    label.className = "past-date";
+    const parts = date.split("-");
+    label.textContent = Number(parts[1]) + "/" + Number(parts[2]);
+    dateRow.appendChild(label);
+  });
+
+  pastBottles.append(bottleRow, board, dateRow);
+  return fullDays;
+}
+
 // マイページを読み込む
 async function loadMyPage() {
   // 今日の自分のボトル
@@ -1273,8 +1354,10 @@ async function loadMyPage() {
     .select("id", { count: "exact", head: true })
     .eq("user_id", currentUser.id)
     .eq("done", true);
-  myStats.textContent = "これまでの達成 " + (count || 0) + "回";
-
+ 
+  const fullDays = await loadPastBottles();
+  myStats.textContent = "これまでの達成 " + (count || 0) + "回 ・ 満タン " + fullDays + "日";
+  
   // フレンドコード
   const code = await getMyCode();
   if (code) {

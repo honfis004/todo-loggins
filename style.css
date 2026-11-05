@@ -1077,3 +1077,43 @@ ul {
 .settings-row.logout {
     color: #B5574A;
 }
+
+/* これまでのボトルの棚 */
+.past-shelf {
+    margin: 18px -16px 0;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.past-shelf::-webkit-scrollbar {
+    display: none;
+}
+
+.past-inner {
+    width: max-content;
+    min-width: 100%;
+}
+
+.past-row {
+    display: flex;
+    gap: 6px;
+    padding: 0 4px;
+    align-items: flex-end;
+}
+
+.past-bottle {
+    width: 54px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.past-date {
+    width: 54px;
+    flex-shrink: 0;
+    text-align: center;
+    font-size: 11px;
+    color: #7A5A5F;
+    padding-top: 4px;
+}
