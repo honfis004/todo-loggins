@@ -927,6 +927,7 @@ ul {
     border-radius: 0;
     opacity: 1;
     color: #3D2A2E;
+    text-decoration: none;
 }
 
 #tasklist .task.liquid .task-label {
@@ -934,7 +935,7 @@ ul {
 }
 
 /* 液体のいちばん上の層を、下に押し下げる */
-#tasklist .liquid-top {
+#tasklist .task.liquid-top {
     margin-top: auto;
 }
 
@@ -943,4 +944,19 @@ ul {
     color: #8a4a40;
     font-size: 14px;
     margin: 0 0 12px;
+}
+
+.add-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.add-row #taskInput {
+    flex: 1 1 100%;
+}
+
+.add-row label {
+    font-size: 13px;
 }
