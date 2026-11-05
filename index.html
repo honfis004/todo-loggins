@@ -36,36 +36,61 @@
          <button id="bellButton" class="bell-button">🔔<span id="bellBadge" class="bell-badge" hidden></span></button>
    
 
-         <div id="dailyArea">
-          <div class="date-nav">
-            <button id="prevDay">◀</button>
-            <input type="date" id="dateInput">
-            <button id="nextDay">▶</button>
+                 <div id="dailyArea">
+
+          <!-- ホーム -->
+          <div id="homeView">
+            <p id="homeDate" class="home-date"></p>
+
+            <button id="myBottleCard" class="my-bottle-card">
+              <div class="bottle">
+                <div class="bottle-cap"></div>
+                <div class="bottle-collar"></div>
+                <div class="bottle-neck"></div>
+                <div id="myBottleBody" class="bottle-body"></div>
+              </div>
+              <div class="my-bottle-info">
+                <strong>じぶん</strong>
+                <span id="myBottleCount"></span>
+                <div id="myBottlePending"></div>
+              </div>
+            </button>
+
+            <div id="everyoneArea"></div>
           </div>
 
-         <input type="text" id="taskInput" placeholder="やることを入力">
+          <!-- 自分のリスト -->
+          <div id="mineView" hidden>
+            <button id="backHome" class="back-button">‹ もどる</button>
 
-         <select id="categorySelect">
-            <option>勉強</option>
-            <option>趣味</option>
-            <option>バイト</option>
-            <option>家事</option>
-            <option>運動</option>
-            <option>その他</option>
-         </select>
+            <div class="date-nav">
+              <button id="prevDay">◀</button>
+              <input type="date" id="dateInput">
+              <button id="nextDay">▶</button>
+            </div>
 
-         <label>
-            <input type="checkbox" id="privateCheck">
-            プライベートモード
-         </label>
+            <input type="text" id="taskInput" placeholder="やることを入力">
 
-         <button id="addButton">追加</button>
+            <select id="categorySelect">
+              <option>勉強</option>
+              <option>趣味</option>
+              <option>バイト</option>
+              <option>家事</option>
+              <option>運動</option>
+              <option>その他</option>
+            </select>
 
-         <ul id="tasklist"></ul>
+            <label>
+              <input type="checkbox" id="privateCheck">
+              プライベートモード
+            </label>
 
-         <h2>フレンドのやること</h2>
-         <div id="everyoneArea"></div>
-        </div>
+            <button id="addButton">追加</button>
+
+            <ul id="tasklist"></ul>
+          </div>
+
+         </div>
 
     <div id="wishArea" hidden>
         <div class="view-tabs">
@@ -74,8 +99,6 @@
             <button id="mineTab">じぶん</button>
         </div>
 
-        <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
-        ……
         <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
         <button id="wishButton">投稿</button>
 
