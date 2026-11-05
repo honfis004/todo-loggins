@@ -2880,3 +2880,21 @@ h3,
     from { background-color: var(--row); }
     to { background-color: transparent; }
 }
+
+/* 満タン：ブレンドした液体が、ゆっくり流れ続ける */
+.liquid-box.blended::before {
+    background-size: 100% 300%;
+    animation: blend-flow 6s ease-in-out infinite alternate;
+}
+
+/* 満タンになった瞬間：溶け合ってから、流れはじめる */
+.liquid-box.blend-in::before {
+    animation:
+        blend-fade 1.6s ease-in-out,
+        blend-flow 6s ease-in-out infinite alternate;
+}
+
+@keyframes blend-flow {
+    from { background-position: 50% 0%; }
+    to { background-position: 50% 100%; }
+}
