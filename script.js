@@ -124,6 +124,9 @@ const BOTTLE_COLORS = [
     { key: "honey", name: "ハニー", line: "#E5BE6A", glass: "#FFF9EC" },
     { key: "clear", name: "クリア", line: "#C9C2C3", glass: "#FFFFFF" }
 ];
+const shelfArea = document.getElementById("shelfArea");
+const friendListView = document.getElementById("friendListView");
+const backHomeFromFriends = document.getElementById("backHomeFromFriends");
 
 let chosenBottle = null;
 let tasks = [];    
@@ -485,9 +488,10 @@ function formatHomeDate(dateString) {
 
 // ホーム ⇔ 自分のリスト
 function showHome() {
-    homeView.hidden = false;
-    mineView.hidden = true;
-    window.scrollTo(0, 0);
+  homeView.hidden = false;
+  mineView.hidden = true;
+  friendListView.hidden = true;
+  window.scrollTo(0, 0);
 }
 
 myBottleCard.addEventListener("click", function () {
@@ -617,7 +621,7 @@ tasklist.addEventListener("click", async function (event) {
 async function loadEveryone() {
   const { data: profiles, error: error1 } = await db
     .from("profiles")
-    .select("id, nickname");
+    .select("id, nickname, bottle_color");
 
   const { data: allTasks, error: error2 } = await db
     .from("tasks")
@@ -666,6 +670,7 @@ async function loadEveryone() {
   const reactions = await getReactions(friendTaskIds);
 
   everyoneArea.innerHTML = "";
+  const shelfItems = []; // 棚に並べる人
 
   profiles.forEach(function (profile) {
     // 自分は上に出ているので省略
@@ -696,6 +701,12 @@ async function loadEveryone() {
       .sort(byCompletedAt);
     const newTasks = photoTasks.filter(function (t) {
       return !seenIds.includes(t.id);
+    });
+        shelfItems.push({
+      profile: profile,
+      theirTasks: theirTasks,
+      photoTasks: photoTasks,
+      newTasks: newTasks,
     });
 
     // 一人分のカードをつくる
@@ -821,12 +832,163 @@ async function loadEveryone() {
     everyoneArea.appendChild(card);
   });
 
+    renderShelf(shelfItems, unlocked, photos); 
+
   if (everyoneArea.innerHTML === "") {
     const message = document.createElement("p");
     message.textContent = "まだフレンドがいません。招待リンクで友達を誘ってみよう！";
     everyoneArea.appendChild(message);
   }
 }
+
+// 小さいボトルを1つ作る
+function makeSmallBottle(colorKey, theirTasks) {
+  const bottle = document.createElement("div");
+  bottle.className = "bottle";
+
+  let color = BOTTLE_COLORS.find(function (c) {
+    return c.key === colorKey;
+  });
+  if (!color) {
+    color = BOTTLE_COLORS[0];
+  }
+  bottle.style.setProperty("--line", color.line);
+  bottle.style.setProperty("--glass", color.glass);
+
+  const cap = document.createElement("div");
+  cap.className = "bottle-cap";
+  const collar = document.createElement("div");
+  collar.className = "bottle-collar";
+  const neck = document.createElement("div");
+  neck.className = "bottle-neck";
+  const body = document.createElement("div");
+  body.className = "bottle-body";
+
+  // 達成した順に、下から液体をためる
+  theirTasks
+    .filter(function (t) {
+      return t.done;
+    })
+    .sort(byCompletedAt)
+    .forEach(function (task) {
+      const layer = document.createElement("div");
+      layer.className = "bottle-layer";
+      layer.style.height = 100 / theirTasks.length + "%";
+      layer.style.background = CATEGORY_COLORS[task.category];
+      body.appendChild(layer);
+    });
+
+  bottle.append(cap, collar, neck, body);
+  return bottle;
+}
+
+// フレンドの棚を描く
+function renderShelf(items, unlocked, photos) {
+  shelfArea.innerHTML = "";
+
+  if (items.length === 0) {
+    const message = document.createElement("p");
+    message.className = "shelf-empty";
+    message.textContent = "まだフレンドがいません。マイページの招待リンクで誘ってみよう！";
+    shelfArea.appendChild(message);
+    return;
+  }
+
+  // 新しい写真がある人を前に
+  items.sort(function (a, b) {
+    const aNew = a.newTasks.length > 0 ? 1 : 0;
+    const bNew = b.newTasks.length > 0 ? 1 : 0;
+    return bNew - aNew;
+  });
+
+  // 4人ずつ1段にする
+  for (let i = 0; i < items.length; i += 4) {
+    const rowItems = items.slice(i, i + 4);
+
+    const bottles = document.createElement("div");
+    bottles.className = "shelf-row-bottles";
+    const board = document.createElement("div");
+    board.className = "shelf-board";
+    const labels = document.createElement("div");
+    labels.className = "shelf-row-labels";
+
+    rowItems.forEach(function (item) {
+      const friend = document.createElement("div");
+      friend.className = "shelf-friend";
+
+      const name = document.createElement("span");
+      name.className = "shelf-name";
+      name.textContent = item.profile.nickname;
+
+      const button = document.createElement("button");
+      button.className = "shelf-bottle";
+      if (!unlocked) {
+        button.classList.add("locked");
+      }
+      if (unlocked && item.newTasks.length > 0) {
+        button.classList.add("glow");
+      }
+      button.appendChild(makeSmallBottle(item.profile.bottle_color, item.theirTasks));
+
+      // ボトルをタップ → 達成写真（新着があれば新着だけ）
+      button.addEventListener("click", function () {
+        if (!unlocked) {
+          alert("この日の自分のリストを書くと見られるよ！");
+          return;
+        }
+        let list = item.newTasks;
+        if (list.length === 0) {
+          list = item.photoTasks;
+        }
+        if (list.length === 0) {
+          alert("まだ写真がないよ");
+          return;
+        }
+        openViewer(toViewerPhotos(list, item.profile.nickname, photos), 0);
+      });
+
+      friend.append(name, button);
+      bottles.appendChild(friend);
+
+      // 棚の下の小さい札
+      const label = document.createElement("div");
+      label.className = "shelf-label";
+      const tag = document.createElement("span");
+      if (unlocked) {
+        const doneCount = item.theirTasks.filter(function (t) {
+          return t.done;
+        }).length;
+        tag.textContent = doneCount + " / " + item.theirTasks.length;
+      } else {
+        tag.textContent = "書くと見える";
+      }
+      label.appendChild(tag);
+      labels.appendChild(label);
+    });
+
+    const row = document.createElement("div");
+    row.append(bottles, board, labels);
+    shelfArea.appendChild(row);
+  }
+}
+
+// 棚の空いているところをタップ → フレンドのリスト
+shelfArea.addEventListener("click", function (event) {
+  if (event.target.closest(".shelf-bottle, .shelf-name")) {
+    return;
+  }
+  if (shelfArea.querySelector(".shelf-empty")) {
+    return;
+  }
+  homeView.hidden = true;
+  friendListView.hidden = false;
+  window.scrollTo(0, 0);
+});
+
+backHomeFromFriends.addEventListener("click", function () {
+  showHome();
+});
+
 // ---------- リアルタイム更新 ----------
 
 function startRealtime() {

@@ -728,3 +728,107 @@ ul {
     min-height: 44px;
     cursor: pointer;
 }
+
+/* フレンドの棚 */
+.shelf-area {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    cursor: pointer;
+}
+
+.shelf-row-bottles,
+.shelf-row-labels {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shelf-row-bottles {
+    align-items: end;
+}
+
+.shelf-friend {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.shelf-name {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.shelf-bottle {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* 棚の板 */
+.shelf-board {
+    height: 10px;
+    border-radius: 4px;
+    background: #E7C3AE;
+    border-top: 3px solid #F2D8C8;
+    box-shadow: 0 5px 9px rgba(120, 70, 50, 0.14);
+}
+
+.shelf-label {
+    text-align: center;
+    padding-top: 4px;
+}
+
+.shelf-label span {
+    font-size: 10px;
+    color: #7A5A5F;
+    background: #FFF1F3;
+    border-radius: 8px;
+    padding: 1px 7px;
+}
+
+/* 棚の上の小さいボトル（大きいボトルの形を小さくする） */
+.shelf-bottle .bottle-cap {
+    width: 20px;
+    height: 12px;
+}
+
+.shelf-bottle .bottle-collar {
+    display: none;
+}
+
+.shelf-bottle .bottle-neck {
+    width: 12px;
+    height: 6px;
+    border-width: 2px;
+}
+
+.shelf-bottle .bottle-body {
+    width: 50px;
+    height: 60px;
+    border-width: 2px;
+    border-bottom-width: 5px;
+    border-radius: 24px 24px 11px 11px / 16px 16px 11px 11px;
+}
+
+/* 自分がまだ書いていない日は、ぼかす */
+.shelf-bottle.locked .bottle-body {
+    filter: blur(3px);
+}
+
+/* 新しい写真がある人は光る */
+@keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 196, 80, 0.6)); }
+    50% { filter: drop-shadow(0 0 9px rgba(255, 196, 80, 1)); }
+}
+
+.shelf-bottle.glow {
+    animation: glow 1.8s ease-in-out infinite;
+}
+
+.shelf-empty {
+    font-size: 13px;
+    color: #7A5A5F;
+    text-align: center;
+}
