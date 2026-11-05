@@ -1742,3 +1742,60 @@ h2 {
     outline: 2px solid #B5574A;
     outline-offset: -2px;
 }
+
+/* グループのやりたいこと（シンプルな1行） */
+#groupWishList {
+    padding: 0;
+}
+
+#groupWishList .group-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 12px 40px 12px 14px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    text-align: left;
+    cursor: pointer;
+}
+
+.group-item .task-label {
+    flex: 1;
+}
+
+/* 達成したら取り消し線（はじめのやることリストと同じ） */
+.group-item.group-done .task-label {
+    text-decoration: line-through;
+    color: #AAAAAA;
+}
+
+.group-item .like-button {
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+.group-item .group-selfie-button {
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* 右はしの × */
+.group-item .delete-button {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #CCCCCC;
+    cursor: pointer;
+}
+
+.group-item .delete-button:hover {
+    color: #D9776B;
+}

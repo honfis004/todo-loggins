@@ -2792,46 +2792,34 @@ async function loadGroupWishes() {
     // ボタンを押したときのために、情報をとっておく
     groupWishData[wish.id] = { wish: wish, mine: mine, selfies: selfies };
 
-    const li = document.createElement("li");
-    li.className = "wish";
+        const li = document.createElement("li");
+    li.className = "group-item";
     li.dataset.id = wish.id;
     if (wish.done) {
-      li.classList.add("wish-done");
+      li.classList.add("group-done");
     }
 
-    const who = document.createElement("div");
-    who.className = "wish-name";
-    who.textContent = nicknameOf(wish.user_id) + " ・ " + formatDate(wish.created_at);
-    li.appendChild(who);
+    // 文字（ここをタップすると、達成・未達成）
+    const label = document.createElement("span");
+    label.className = "task-label";
+    label.textContent = wish.text;
+    li.appendChild(label);
 
-    const body = document.createElement("div");
     if (wish.done) {
-      body.textContent = "🎉 " + wish.text;
-    } else {
-      body.textContent = wish.text;
-    }
-    li.appendChild(body);
-
-    // 達成したものは、届いた丸い自撮り
-    if (wish.done) {
+      // 達成したもの：届いた丸い自撮りと、🤳 ボタン
       li.appendChild(makeReactionBubbles(selfies));
-    }
-
-    // ボタンの列
-    const actions = document.createElement("div");
-    actions.className = "wish-actions";
-
-    const doneButton = document.createElement("button");
-    doneButton.className = "wish-done-button";
-    if (wish.done) {
-      doneButton.textContent = "未達成に戻す";
+      const selfieButton = document.createElement("button");
+      selfieButton.className = "group-selfie-button";
+      if (mine && mine.kind === "selfie") {
+        selfieButton.textContent = "🤳✓";
+        selfieButton.setAttribute("aria-label", "スナップを取り消す");
+      } else {
+        selfieButton.textContent = "🤳";
+        selfieButton.setAttribute("aria-label", "スナップを送る");
+      }
+      li.appendChild(selfieButton);
     } else {
-      doneButton.textContent = "達成！";
-    }
-    actions.appendChild(doneButton);
-
-    if (!wish.done) {
-      // これからのものは、いいね
+      // これからのもの：いいね
       const likeButton = document.createElement("button");
       likeButton.className = "like-button";
       if (mine && mine.kind === "like") {
@@ -2840,40 +2828,14 @@ async function loadGroupWishes() {
       } else {
         likeButton.textContent = "♡ " + likes.length;
       }
-      actions.appendChild(likeButton);
-    } else {
-      // 達成したものは、自撮りのスナップ
-      const selfieButton = document.createElement("button");
-      selfieButton.className = "group-selfie-button";
-      if (mine && mine.kind === "selfie") {
-        selfieButton.textContent = "スナップを取り消す";
-      } else {
-        selfieButton.textContent = "🤳 スナップを送る";
-      }
-      actions.appendChild(selfieButton);
+      li.appendChild(likeButton);
     }
 
-    li.appendChild(actions);
-
-    // グループではメンバー全員に削除ボタン
+    // 右はし：削除
     const deleteButton = document.createElement("button");
-    deleteButton.textContent = "✕";
+    deleteButton.textContent = "×";
     deleteButton.className = "delete-button";
     li.appendChild(deleteButton);
-
-    // いいねした人の名前
-    if (!wish.done && likes.length > 0) {
-      const likePeople = document.createElement("div");
-      likePeople.className = "wish-people";
-      likePeople.textContent =
-        "♥ " +
-        likes
-          .map(function (r) {
-            return r.name;
-          })
-          .join("、");
-      li.appendChild(likePeople);
-    }
 
     groupWishList.appendChild(li);
   });
@@ -2929,7 +2891,7 @@ groupWishButton.addEventListener("click", async function () {
   loadGroupWishes();
 });
 
-// グループのボタン（自撮りを見る・削除・達成・いいね・スナップ）
+// グループのやりたいことをタップしたとき
 groupWishList.addEventListener("click", async function (event) {
   const li = event.target.closest("li");
   if (!li) {
@@ -2979,20 +2941,6 @@ groupWishList.addEventListener("click", async function (event) {
     return;
   }
 
-  // 達成・未達成
-  if (event.target.classList.contains("wish-done-button")) {
-    const { error } = await db
-      .from("group_wishes")
-      .update({ done: !info.wish.done })
-      .eq("id", id);
-    if (error) {
-      alert("更新できませんでした：" + error.message);
-      return;
-    }
-    loadGroupWishes();
-    return;
-  }
-
   // いいね（もう押していたら取り消し）
   if (event.target.classList.contains("like-button")) {
     if (info.mine) {
@@ -3022,7 +2970,24 @@ groupWishList.addEventListener("click", async function (event) {
       facingMode = "user";
       openCamera(id, "group-reaction");
     }
+    return;
   }
+
+  // 丸い自撮りのならびのすき間は、何もしない
+  if (event.target.closest(".reactions")) {
+    return;
+  }
+
+  // それ以外（文字のところ）→ 達成・未達成を切りかえる
+  const { error } = await db
+    .from("group_wishes")
+    .update({ done: !info.wish.done })
+    .eq("id", id);
+  if (error) {
+    alert("更新できませんでした：" + error.message);
+    return;
+  }
+  loadGroupWishes();
 });
 
 // グループの招待リンクをコピー
