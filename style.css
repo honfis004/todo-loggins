@@ -832,3 +832,37 @@ ul {
     color: #7A5A5F;
     text-align: center;
 }
+/* フレンドのリスト（見本の形） */
+#everyoneArea .person {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #FFF1F3;
+    border-radius: 18px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.person-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+#everyoneArea .person h3 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    text-align: left;
+}
+
+#everyoneArea .person ul {
+    padding: 0;
+    margin: 0;
+}
+
+#everyoneArea .person .task {
+    padding: 4px 8px;
+    margin: 3px 0;
+    border-radius: 8px;
+    font-size: 12px;
+    background: #FFFFFF;
+}

@@ -716,6 +716,33 @@ async function loadEveryone() {
       card.classList.add("locked");
     }
 
+        // 左：小さいボトル（タップで写真）
+    const side = document.createElement("button");
+    side.className = "shelf-bottle person-bottle";
+    if (unlocked && newTasks.length > 0) {
+      side.classList.add("glow");
+    }
+    side.appendChild(makeSmallBottle(profile.bottle_color, theirTasks));
+    side.addEventListener("click", function () {
+      if (!unlocked) {
+        alert("この日の自分のリストを書くと見られるよ！");
+        return;
+      }
+      let list = newTasks;
+      if (list.length === 0) {
+        list = photoTasks;
+      }
+      if (list.length === 0) {
+        alert("まだ写真がないよ");
+        return;
+      }
+      openViewer(toViewerPhotos(list, profile.nickname, photos), 0);
+    });
+
+    // 右：名前とタスクを入れる箱
+    const main = document.createElement("div");
+    main.className = "person-main";
+
     // 名前の行（名前・達成数・新着マーク）
     const header = document.createElement("div");
     header.className = "person-header";
@@ -750,17 +777,17 @@ async function loadEveryone() {
 
       header.appendChild(mark);
     }
-    card.appendChild(header);
+    main.appendChild(header);
 
     // タスクの一覧
     const ul = document.createElement("ul");
     theirTasks.forEach(function (task) {
       const li = document.createElement("li");
       li.className = "task";
-      if (task.done) {
+         if (task.done) {
         li.classList.add("done");
+        li.style.background = CATEGORY_COLORS[task.category];
       }
-
       // 左：写真があれば小さい📷（押すとその写真から見られる）
       if (photos[task.id]) {
         const small = document.createElement("span");
@@ -820,15 +847,15 @@ async function loadEveryone() {
 
       ul.appendChild(li);
     });
-    card.appendChild(ul);
+    main.appendChild(ul);
 
     if (!unlocked) {
       const lock = document.createElement("p");
       lock.className = "lock-message";
       lock.textContent = "この日の自分のリストを書くと、見られるようになるよ";
-      card.appendChild(lock);
+      main.appendChild(lock);
     }
-
+    card.append(side, main);
     everyoneArea.appendChild(card);
   });
 
