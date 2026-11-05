@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>やることリスト</title>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="manifest" href="manifest.json">
+        <link rel="apple-touch-icon" href="icon-192.png">
+        <meta name="theme-color" content="#d9776b">
+    </head>
+    <body>
+        <h1>今日やること</h1>
+
+        <div id="authArea">
+            <input type="email" id="emailInput" placeholder="メールアドレス">
+            <input type="password" id="passwordInput" placeholder="パスワード">
+            <button id="signupButton">新規登録</button>
+            <button id="loginButton">ログイン</button>
+        </div>
+        <div id="nicknameArea" hidden>
+            <p>ニックネームを決めてください（２０文字まで）</p>
+            <input type="text" id="nicknameInput" placeholder="ニックネーム">
+            <button id="nicknameButton">決定</button>
+        </div>
+
+        <div id="bottleArea" hidden>
+        <h2>ボトルの色をえらんでね</h2>
+        <p>あとからマイページで変えられるよ</p>
+        <div id="bottleChoices"></div>
+        <button id="bottleButton" disabled>このボトルではじめる</button>
+        </div>
+
+        <div id="appArea" hidden>
+    
+         <button id="bellButton" class="bell-button">🔔<span id="bellBadge" class="bell-badge" hidden></span></button>
+   
+
+         <div id="dailyArea">
+          <div class="date-nav">
+            <button id="prevDay">◀</button>
+            <input type="date" id="dateInput">
+            <button id="nextDay">▶</button>
+          </div>
+
+         <input type="text" id="taskInput" placeholder="やることを入力">
+
+         <select id="categorySelect">
+            <option>勉強</option>
+            <option>趣味</option>
+            <option>バイト</option>
+            <option>家事</option>
+            <option>運動</option>
+            <option>その他</option>
+         </select>
+
+         <label>
+            <input type="checkbox" id="privateCheck">
+            プライベートモード
+         </label>
+
+         <button id="addButton">追加</button>
+
+         <ul id="tasklist"></ul>
+
+         <h2>フレンドのやること</h2>
+         <div id="everyoneArea"></div>
+        </div>
+
+    <div id="wishArea" hidden>
+        <div class="view-tabs">
+            <button id="friendsTab" class="active">フレンド</button>
+            <button id="everyoneTab">みんな</button>
+            <button id="mineTab">じぶん</button>
+        </div>
+
+        <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
+        ……
+        <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
+        <button id="wishButton">投稿</button>
+
+        <ul id="wishList"></ul>
+    </div>
+    
+        <div id="groupArea" hidden>
+    <div class="group-create">
+        <input type="text" id="groupNameInput" placeholder="新しいグループの名前" maxlength="30">
+        <button id="createGroupButton">グループを作る</button>
+    </div>
+
+    <p id="noGroupMessage">まだグループがありません。グループを作って、招待リンクで誘ってみよう！</p>
+
+    <div id="groupContent" hidden>
+        <select id="groupSelect"></select>
+        <p id="groupMembers"></p>
+        <button id="groupInviteButton">このグループに招待</button>
+        <button id="leaveGroupButton">グループを抜ける</button>
+
+        <div class="group-wish-form">
+            <input type="text" id="groupWishInput" placeholder="みんなでやりたいこと" maxlength="100">
+            <button id="groupWishButton">追加</button>
+        </div>
+
+        <ul id="groupWishList"></ul>
+    </div>
+</div>
+       <div id="mypageArea" hidden>
+    <h2>マイページ</h2>
+    <div class="profileCard">
+        <p id="userInfo"></p>
+        <button id="inviteButton">招待リンクをコピー</button>
+    </div>
+    <button id="logoutButton">ログアウト</button>
+</div>
+
+<nav class="bottomNav">
+    <button id="dailyTab" class="active">
+        <svg viewBox="0 0 24 24"><path d="M10 2h4v4h-4z"></path><path d="M9 6h6v3a6 6 0 0 1 3 5v5a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-5a6 6 0 0 1 3-5z"></path></svg>
+        まいにち
+    </button>
+    <button id="wishTab">
+        <svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"></path></svg>
+        やってみたい
+    </button>
+    <button id="groupTab">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><circle cx="17" cy="9" r="2.8"></circle><path d="M16 14.2a5 5 0 0 1 5.5 5.8"></path></svg>
+        グループ
+    </button>
+    <button id="mypageTab">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>
+        マイページ
+    </button>
+</nav>
+</div>
+      
+        <div id="doneMenu" class="overlay" hidden>
+    <div class="sheet">
+        <p id="doneMenuTitle"></p>
+        <button id="donePhotoButton">📷 撮って達成</button>
+        <button id="doneNoPhotoButton">💧 撮らずに達成</button>
+        <button id="doneCancelButton">やめる</button>
+    </div>
+        </div>
+
+        <div id="cameraArea" class="overlay" hidden>
+    <video id="cameraVideo" autoplay playsinline muted></video>
+    <div class="camera-buttons">
+        <button id="cameraCancel">✕</button>
+        <button id="cameraShutter">📸</button>
+        <button id="cameraFlip">🔄</button>
+    </div>
+        </div>
+        
+        <div id="photoViewer" class="overlay" hidden>
+          <div class="viewer-top">
+          <span id="viewerInfo"></span>
+          <button id="viewerClose">✕</button>
+          </div>
+        <img id="viewerImage">
+        <p id="viewerCaption"></p>
+            <div id="viewerReactions" class="viewer-reactions">
+        <button>👏</button>
+        <button>🔥</button>
+        <button>💪</button>
+        <button>🥹</button>
+        <button>✨</button>
+        <button>😂</button>
+        <button id="viewerSelfie">🤳</button>
+            </div>
+        </div>
+
+        <div id="reactionMenu" class="overlay" hidden>
+         <div class="sheet">
+        <p id="reactionTitle"></p>
+         <div id="reactionEmojis" class="emoji-row">
+            <button>👏</button>
+            <button>🔥</button>
+            <button>💪</button>
+            <button>🥹</button>
+            <button>✨</button>
+            <button>😂</button>
+         </div>
+        <button id="reactionSelfie">🤳 自撮りで送る</button>
+        <button id="reactionCheer">📣 がんばれ！を送る</button>
+        <button id="reactionRemove">リアクションを取り消す</button>
+        <button id="reactionCancel">やめる</button>
+         </div>
+        </div>
+        <div id="reactionPicker" class="reaction-picker" hidden></div>
+        
+        <div id="notificationPanel" class="overlay" hidden>
+    <div class="sheet notification-sheet">
+        <div class="sheet-header">
+            <strong>お知らせ</strong>
+            <button id="notificationSettingsButton">⚙️</button>
+        </div>
+        <ul id="notificationList"></ul>
+        <button id="notificationClose">とじる</button>
+    </div>
+    
+</div>
+
+<div id="settingsPanel" class="overlay" hidden>
+    <div class="sheet">
+        <strong>通知の設定</strong>
+        <label><input type="checkbox" id="setFirstTask"> フレンドがリストを作ったとき</label>
+        <label><input type="checkbox" id="setReactions"> リアクションが届いたとき</label>
+        <label><input type="checkbox" id="setWishes"> やってみたいことへのいいね・リウィッシュ</label>
+        <label><input type="checkbox" id="setGroups"> グループの更新</label>
+        <p>フレンドの達成度を知らせるタイミング</p>
+        <div id="levelChecks" class="level-checks"></div>
+        <button id="settingsSave">保存</button>
+        <button id="settingsCancel">やめる</button>
+    </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="script.js"></script>
+    </body>
+</html>
