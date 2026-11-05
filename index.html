@@ -82,25 +82,7 @@
               </div>
             </div>
 
-            <div class="add-row">
-              <input type="text" id="taskInput" placeholder="やることを入力">
-
-              <select id="categorySelect">
-                <option>勉強</option>
-                <option>趣味</option>
-                <option>バイト</option>
-                <option>家事</option>
-                <option>運動</option>
-                <option>その他</option>
-              </select>
-
-              <label>
-                <input type="checkbox" id="privateCheck">
-                プライベートモード
-              </label>
-
-              <button id="addButton">追加</button>
-            </div>
+             <button id="openAddSheet" class="add-fab" aria-label="やることを追加">＋</button>
           </div>
 
                    <!-- フレンドのリスト -->
@@ -281,7 +263,26 @@
         マイページ
     </button>
 </nav>
-</div>
+</div>        <div id="addSheet" class="overlay light" hidden>
+            <div class="sheet add-sheet">
+                <strong>やることを追加</strong>
+                <input type="text" id="taskInput" placeholder="やることを入力">
+                <select id="categorySelect">
+                    <option>勉強</option>
+                    <option>趣味</option>
+                    <option>バイト</option>
+                    <option>家事</option>
+                    <option>運動</option>
+                    <option>その他</option>
+                </select>
+                <label class="private-label">
+                    <input type="checkbox" id="privateCheck">
+                    プライベートモード
+                </label>
+                <button id="addButton">追加</button>
+                <button id="addCancel">やめる</button>
+            </div>
+        </div>
       
         <div id="doneMenu" class="overlay" hidden>
     <div class="sheet">

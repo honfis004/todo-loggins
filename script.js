@@ -254,6 +254,10 @@ const friendAvatar = document.getElementById("friendAvatar");
 
 let myAvatarUrl = null;
 
+const openAddSheet = document.getElementById("openAddSheet");
+const addSheet = document.getElementById("addSheet");
+const addCancel = document.getElementById("addCancel");
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -637,6 +641,31 @@ backHome.addEventListener("click", function () {
     showHome();
 });
 
+// ＋ → 入力のポップアップを開く
+openAddSheet.addEventListener("click", function () {
+  addSheet.hidden = false;
+  taskinput.focus();
+});
+
+// 「やめる」で閉じる
+addCancel.addEventListener("click", function () {
+  addSheet.hidden = true;
+});
+
+// うしろの暗いところをタップしても閉じる
+addSheet.addEventListener("click", function (event) {
+  if (event.target === addSheet) {
+    addSheet.hidden = true;
+  }
+});
+
+// Enter キーでも追加できる（日本語の変換中は追加しない）
+taskinput.addEventListener("keydown", function (event) {
+  if (event.key === "Enter" && !event.isComposing) {
+    addButton.click();
+  }
+});
+
 //追加ボタン
 addButton.addEventListener("click", async function() {
     const text= taskinput.value.trim();
@@ -676,6 +705,7 @@ addButton.addEventListener("click", async function() {
      }
     }
     taskinput.value = "";
+    addSheet.hidden = true;
     privateCheck.checked = false;
     loadTasks();
 });
