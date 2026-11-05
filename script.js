@@ -268,6 +268,13 @@ const myReactions = document.getElementById("myReactions");
 
 let todayReactions = []; // 今日もらったリアクション（どのタスクかの情報つき）
 
+const viewerBars = document.getElementById("viewerBars");
+const viewerName = document.getElementById("viewerName");
+const viewerStage = document.getElementById("viewerStage");
+const viewerCategory = document.getElementById("viewerCategory");
+
+let allProfiles = []; // 名前をタップしたときに、その人のマイページを開くため
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -310,11 +317,13 @@ signupButton.addEventListener("click", async function() {
 });
 // ログイン
 loginButton.addEventListener("click", async function() {
+      authArea.hidden = true;
     const {error} = await db.auth.signInWithPassword    ({
         email: emailInput.value,
         password: passwordInput.value
     });
     if (error) {
+        authArea.hidden = false;
         alert("ログインに失敗しました: " + error.message);
     }
 });
@@ -369,16 +378,21 @@ async function checkProfile() {
         appArea.hidden = true;
     }
 }
-// リスト画面を見せる
+
+// 全部読み込んでから、アプリの画面を見せる
 async function showApp(nickname) {
     bottleArea.hidden = true;
     nicknameArea.hidden = true;
-    appArea.hidden = false;
-    appTitle.hidden = true;
     userInfo.textContent = nickname;
+
+    // かざりの一覧 → 自分のリストとフレンドの棚（2つは同時に）を読み終わるまで待つ
     await loadDecorations();
-    loadTasks();
-    loadEveryone();
+    await Promise.all([loadTasks(), loadEveryone()]);
+
+    // そろったら、タイトルを消してアプリを出す
+    appTitle.hidden = true;
+    appArea.hidden = false;
+
     startRealtime();
     useInvite();
     useGroupInvite();
@@ -982,6 +996,7 @@ async function loadEveryone() {
     alert("みんなのリストを読み込めませんでした");
     return;
   }
+  allProfiles = profiles;
 
   // フレンドのIDだけを並べた配列にする
   const friendIds = friendRows.map(function (row) {
@@ -2945,7 +2960,7 @@ wishList.addEventListener("click", async function (event) {
     longPressed = false;
     return;
   }
-  
+
   const li = event.target.closest("li");
   if (!li) {
     return;
@@ -3678,13 +3693,14 @@ function myViewerPhotos() {
     })
     .sort(byCompletedAt)
     .map(function (task) {
-      let caption = "【" + task.category + "】" + task.text;
+      let text = task.text;
       if (task.is_private) {
-        caption = "🗝 " + caption;
+        text = "🗝 " + text;
       }
       return {
         url: task.photo.url,
-        caption: caption,
+        text: text,
+        category: task.category,
         name: "じぶん",
         time: formatTime(task.completed_at),
         taskId: task.id,
@@ -3696,14 +3712,16 @@ function myViewerPhotos() {
 // フレンドの写真を、全画面表示用の形にまとめる
 function toViewerPhotos(taskList, name, photos) {
   return taskList.map(function (task) {
-    let caption = "【" + task.category + "】" + task.text;
+    let text = task.text;
     if (task.is_private) {
-      caption = "【" + task.category + "】ひみつ！";
+      text = "ひみつ！";
     }
     return {
       url: photos[task.id].url,
-      caption: caption,
+      text: text,
+      category: task.category,
       name: name,
+      userId: task.user_id,
       time: formatTime(task.completed_at),
       taskId: task.id,
       mine: false,
@@ -3750,14 +3768,48 @@ function openViewer(photos, startIndex) {
 // 今の1枚を表示して、3秒後に次へ
 function showViewerPhoto() {
   clearTimeout(viewerTimer);
-
   const p = viewerPhotos[viewerIndex];
+
+  // 写真（丸い自撮りのときは丸く）
   viewerImage.src = p.url;
-  viewerCaption.textContent = p.caption;
-   viewerReactions.hidden = p.mine;
-   viewerImage.classList.toggle("round", p.round === true);
-  viewerInfo.textContent =
-    p.name + " ・ " + p.time + "　" + (viewerIndex + 1) + " / " + viewerPhotos.length;
+  viewerStage.classList.toggle("round", p.round === true);
+
+  // 写真の上の文字（カテゴリーなし）
+  viewerCaption.textContent = p.text || p.caption || "";
+
+  // 名前（フレンドの写真のときだけタップできる）と、時間・何枚目か
+  viewerName.textContent = p.name;
+  viewerName.disabled = !p.userId;
+  let info = (viewerIndex + 1) + " / " + viewerPhotos.length;
+  if (p.time) {
+    info = p.time + " ・ " + info;
+  }
+  viewerInfo.textContent = info;
+
+  // 上のバー（見たところまで色が付く）
+  viewerBars.innerHTML = "";
+  viewerPhotos.forEach(function (x, k) {
+    const bar = document.createElement("div");
+    bar.className = "viewer-bar";
+    if (k <= viewerIndex) {
+      bar.classList.add("on");
+    }
+    viewerBars.appendChild(bar);
+  });
+
+  // カテゴリー（色の丸つき）
+  viewerCategory.innerHTML = "";
+  if (p.category) {
+    const dot = document.createElement("span");
+    dot.className = "viewer-dot";
+    dot.style.background = CATEGORY_COLORS[p.category];
+    const name = document.createElement("span");
+    name.textContent = p.category;
+    viewerCategory.append(dot, name);
+  }
+
+  // 自分の写真のときは、リアクションを出さない
+  viewerReactions.hidden = p.mine;
 
   if (!p.mine) {
     markViewed(p.taskId);
@@ -3788,14 +3840,29 @@ function closeViewer() {
   loadEveryone(); // 新着マークを更新する
 }
 
-// 画面の左半分 → 前へ、右半分 → 次へ、✕ → 閉じる、下の絵文字 → リアクション
+// ✕ → 閉じる、名前 → その人のマイページ、絵文字 → リアクション、写真の左右 → 前・次
 photoViewer.addEventListener("click", function (event) {
-  if (event.target === viewerClose) {
+  // ✕
+  if (event.target.closest("#viewerClose")) {
     closeViewer();
     return;
   }
 
-  // リアクションの列の中が押されたとき
+  // 名前 → その人のマイページ
+  if (event.target.closest("#viewerName")) {
+    const p = viewerPhotos[viewerIndex];
+    const profile = allProfiles.find(function (x) {
+      return x.id === p.userId;
+    });
+    if (profile) {
+      closeViewer();
+      showSection("daily");
+      openFriendPage(profile);
+    }
+    return;
+  }
+
+  // リアクションの列
   if (event.target.closest(".viewer-reactions")) {
     if (event.target.tagName !== "BUTTON") {
       return;
@@ -3818,10 +3885,14 @@ photoViewer.addEventListener("click", function (event) {
     return;
   }
 
-  if (event.clientX < window.innerWidth / 2) {
-    prevPhoto();
-  } else {
-    nextPhoto();
+  // 写真のところ：左半分 → 前、右半分 → 次
+  if (event.target.closest("#viewerStage")) {
+    const rect = viewerStage.getBoundingClientRect();
+    if (event.clientX < rect.left + rect.width / 2) {
+      prevPhoto();
+    } else {
+      nextPhoto();
+    }
   }
 });
 

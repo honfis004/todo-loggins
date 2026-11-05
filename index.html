@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>dropIn</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+               <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&display=swap&text=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%20.,!%3F%2F:-" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,7 @@
     </head>
     <body>
         <h1 id="appTitle">dropIn</h1>
-        <div id="authArea">
+        <div id="authArea" hidden>
             <input type="email" id="emailInput" placeholder="メールアドレス">
             <input type="password" id="passwordInput" placeholder="パスワード">
             <button id="signupButton">新規登録</button>
@@ -305,24 +305,34 @@
     </div>
         </div>
         
-        <div id="photoViewer" class="overlay" hidden>
-          <div class="viewer-top">
-          <span id="viewerInfo"></span>
-          <button id="viewerClose">✕</button>
-          </div>
-        <img id="viewerImage">
-        <p id="viewerCaption"></p>
+             <div id="photoViewer" class="viewer" hidden>
+            <div id="viewerBars" class="viewer-bars"></div>
+
+            <div class="viewer-top">
+                <div class="viewer-who">
+                    <button id="viewerName" class="viewer-name"></button>
+                    <span id="viewerInfo" class="viewer-info"></span>
+                </div>
+                <button id="viewerClose" aria-label="とじる">✕</button>
+            </div>
+
+            <div id="viewerStage" class="viewer-stage">
+                <img id="viewerImage" alt="">
+                <p id="viewerCaption" class="viewer-caption"></p>
+            </div>
+
+            <div id="viewerCategory" class="viewer-category"></div>
+
             <div id="viewerReactions" class="viewer-reactions">
-        <button>👏</button>
-        <button>🔥</button>
-        <button>💪</button>
-        <button>🥹</button>
-        <button>✨</button>
-        <button>😂</button>
-        <button id="viewerSelfie">🤳</button>
+                <button>👏</button>
+                <button>🔥</button>
+                <button>💪</button>
+                <button>🥹</button>
+                <button>✨</button>
+                <button id="viewerSelfie" aria-label="自撮りで送る">🤳</button>
             </div>
         </div>
-
+        
         <div id="reactionMenu" class="overlay" hidden>
          <div class="sheet">
         <p id="reactionTitle"></p>

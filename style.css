@@ -2318,7 +2318,7 @@ h2 {
     background-image: var(--avatar, none);
     background-size: cover;
     background-position: center;
-    opacity: 0.3;
+    opacity: 0.6;
     pointer-events: none;
 }
 
@@ -2330,7 +2330,7 @@ button,
 input,
 select {
     font-family: "Kaisei Decol", "Shippori Mincho", serif;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 /* 大きめに出る字は太字に */
@@ -2345,12 +2345,12 @@ h3,
 .settings-title,
 .section-title,
 .deco-theme strong {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 /* ロゴ（dropIn） */
 #appTitle {
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.06em;
 }
 
@@ -2443,4 +2443,203 @@ h3,
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+}
+
+/* ---------- 棚を銀色に ---------- */
+.shelf-board {
+    background: linear-gradient(#F4F5F7, #C9CED5);
+    border-top: 3px solid #FFFFFF;
+    box-shadow: 0 5px 9px rgba(80, 90, 105, 0.18);
+}
+
+/* 名前のプレートも銀色に */
+.shelf-plate {
+    border: 1px solid #AEB4BC;
+    background: linear-gradient(#FFFFFF, #E4E7EB);
+    box-shadow: 0 1px 2px rgba(80, 90, 105, 0.25);
+    color: #4A4F57;
+}
+/* ---------- 入力欄を画面の下に ---------- */
+.wish-form,
+.group-wish-form {
+    position: fixed;
+    left: 50%;
+    bottom: calc(61px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    z-index: 15;
+    width: min(100%, 500px);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px 16px;
+    background: var(--page-bg);
+    border-top: 1px solid #F6D9DE;
+}
+
+/* 下の入力欄に、リストの最後が隠れないように */
+#wishArea,
+#groupArea {
+    padding-bottom: 64px;
+}
+
+/* ---------- 写真を見る画面（見本の形） ---------- */
+.viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    padding: calc(14px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+    background: var(--page-bg);
+    color: #3D2A2E;
+}
+
+/* 何枚目かのバー */
+.viewer-bars {
+    display: flex;
+    gap: 4px;
+}
+
+.viewer-bar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: #F3D3D8;
+}
+
+.viewer-bar.on {
+    background: #B5574A;
+}
+
+/* 名前・時間と ✕ */
+.viewer .viewer-top {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: inherit;
+}
+
+.viewer-who {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.viewer-name {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    color: #3D2A2E;
+    cursor: pointer;
+}
+
+.viewer-name:disabled {
+    cursor: default;
+}
+
+.viewer-info {
+    font-size: 12px;
+    color: #7A5A5F;
+}
+
+.viewer #viewerClose {
+    width: 44px;
+    height: 44px;
+    color: #3D2A2E;
+    font-size: 22px;
+}
+
+/* 写真（左半分で前、右半分で次） */
+.viewer-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #EEEEEE;
+    cursor: pointer;
+}
+
+.viewer #viewerImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+/* 写真の上の白い大きな文字 */
+.viewer .viewer-caption {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0 24px;
+    color: #FFFFFF;
+    font-size: 26px;
+    font-weight: 800;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* 丸い自撮りを見るとき */
+.viewer-stage.round {
+    background: none;
+}
+
+.viewer-stage.round #viewerImage {
+    position: static;
+    width: 70vw;
+    height: 70vw;
+    max-width: 320px;
+    max-height: 320px;
+    border-radius: 50%;
+}
+
+.viewer-stage.round .viewer-caption {
+    display: none;
+}
+
+/* カテゴリー */
+.viewer-category {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 18px;
+    font-size: 13px;
+    color: #7A5A5F;
+}
+
+.viewer-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* リアクション */
+.viewer .viewer-reactions {
+    position: static;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+}
+
+.viewer #viewerSelfie {
+    width: 40px;
+    height: 40px;
+    border: 2px dashed #E8A79C;
+    border-radius: 50%;
+    font-size: 18px;
 }
