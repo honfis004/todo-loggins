@@ -144,13 +144,35 @@
     </div>
 </div>
        <div id="mypageArea" hidden>
-    <h2>マイページ</h2>
-    <div class="profileCard">
-        <p id="userInfo"></p>
-        <button id="inviteButton">招待リンクをコピー</button>
-    </div>
-    <button id="logoutButton">ログアウト</button>
-</div>
+         <div class="page-header">
+           <h2>マイページ</h2>
+           <button id="settingsOpen" class="gear-button" aria-label="設定">⚙️</button>
+         </div>
+
+         <div class="profile-card">
+           <div class="profile-top">
+             <div id="myPageBottle" class="shelf-bottle"></div>
+             <div class="profile-info">
+               <strong id="userInfo"></strong>
+               <span id="myStats"></span>
+             </div>
+           </div>
+           <div class="friend-code-row">
+             <span class="friend-code-label">フレンドコード</span>
+             <span id="myCodeText" class="friend-code"></span>
+             <button id="inviteButton" class="copy-button">招待リンクをコピー</button>
+           </div>
+         </div>
+       </div>
+
+       <div id="settingsArea" hidden>
+         <button id="settingsBack" class="back-button">‹ もどる</button>
+         <h2>設定</h2>
+         <div class="settings-card">
+           <button id="openNotificationSettings" class="settings-row">通知の設定</button>
+           <button id="logoutButton" class="settings-row logout">ログアウト</button>
+         </div>
+       </div>
 
 <nav class="bottomNav">
     <button id="dailyTab" class="active">

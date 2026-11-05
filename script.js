@@ -128,6 +128,13 @@ const shelfArea = document.getElementById("shelfArea");
 const friendListView = document.getElementById("friendListView");
 const backHomeFromFriends = document.getElementById("backHomeFromFriends");
 const fullMessage = document.getElementById("fullMessage");
+const settingsOpen = document.getElementById("settingsOpen");
+const settingsArea = document.getElementById("settingsArea");
+const settingsBack = document.getElementById("settingsBack");
+const openNotificationSettings = document.getElementById("openNotificationSettings");
+const myPageBottle = document.getElementById("myPageBottle");
+const myStats = document.getElementById("myStats");
+const myCodeText = document.getElementById("myCodeText");
 
 let chosenBottle = null;
 let tasks = [];    
@@ -1254,10 +1261,51 @@ mineTab.addEventListener("click", function () {
   setViewMode("mine");
 });
 
+// マイページを読み込む
+async function loadMyPage() {
+  // 今日の自分のボトル
+  myPageBottle.innerHTML = "";
+  myPageBottle.appendChild(makeSmallBottle(myBottleColor, tasks));
+
+  // これまでの達成回数（数だけを数える）
+  const { count } = await db
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", currentUser.id)
+    .eq("done", true);
+  myStats.textContent = "これまでの達成 " + (count || 0) + "回";
+
+  // フレンドコード
+  const code = await getMyCode();
+  if (code) {
+    myCodeText.textContent = code;
+  }
+}
+
+// ⚙️ → 設定
+settingsOpen.addEventListener("click", function () {
+  mypageArea.hidden = true;
+  settingsArea.hidden = false;
+  window.scrollTo(0, 0);
+});
+
+// 設定 → マイページにもどる
+settingsBack.addEventListener("click", function () {
+  settingsArea.hidden = true;
+  mypageArea.hidden = false;
+  window.scrollTo(0, 0);
+});
+
+// 通知の設定（前に作ったパネルを開く）
+openNotificationSettings.addEventListener("click", function () {
+  openSettings();
+});
+
 // ---------- やってみたいこと ----------
 
 // 下のメニューの切り替え
 function showSection(name) {
+  settingsArea.hidden = true;
   dailyArea.hidden = name !== "daily";
   wishArea.hidden = name !== "wish";
   groupArea.hidden = name !== "group";
@@ -1276,6 +1324,9 @@ function showSection(name) {
   }
   if (name === "group") {
     loadGroups();
+  }
+    if (name === "mypage") {
+    loadMyPage();
   }
   window.scrollTo(0, 0);
 }
