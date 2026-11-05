@@ -141,34 +141,44 @@
             <button id="mineTab">じぶん</button>
         </div>
 
-        <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
-        <button id="wishButton">投稿</button>
+        <div class="wish-form">
+            <input type="text" id="wishInput" placeholder="いつかやってみたいこと" maxlength="100">
+            <button id="wishButton">投稿</button>
+        </div>
 
         <ul id="wishList"></ul>
     </div>
     
-        <div id="groupArea" hidden>
-    <div class="group-create">
-        <input type="text" id="groupNameInput" placeholder="新しいグループの名前" maxlength="30">
-        <button id="createGroupButton">グループを作る</button>
-    </div>
+          <div id="groupArea" hidden>
+        <p id="noGroupMessage" class="group-empty">まだグループがありません。グループを作って、招待リンクで誘ってみよう！</p>
 
-    <p id="noGroupMessage">まだグループがありません。グループを作って、招待リンクで誘ってみよう！</p>
+        <div id="groupContent" hidden>
+            <div class="group-top">
+                <h2 id="groupTitle" class="group-title"></h2>
+                <select id="groupSelect" class="group-switch"></select>
+                <p id="groupMembers"></p>
+                <div class="group-buttons">
+                    <button id="groupInviteButton" class="pill-button">招待リンクをコピー</button>
+                    <button id="leaveGroupButton" class="pill-button quiet">抜ける</button>
+                </div>
+            </div>
 
-    <div id="groupContent" hidden>
-        <select id="groupSelect"></select>
-        <p id="groupMembers"></p>
-        <button id="groupInviteButton">このグループに招待</button>
-        <button id="leaveGroupButton">グループを抜ける</button>
+            <div class="group-wish-form">
+                <input type="text" id="groupWishInput" placeholder="みんなでやりたいこと" maxlength="100">
+                <button id="groupWishButton">追加</button>
+            </div>
 
-        <div class="group-wish-form">
-            <input type="text" id="groupWishInput" placeholder="みんなでやりたいこと" maxlength="100">
-            <button id="groupWishButton">追加</button>
+            <ul id="groupWishList"></ul>
         </div>
 
-        <ul id="groupWishList"></ul>
+        <div class="group-create">
+            <p class="group-create-title">新しいグループを作る</p>
+            <div class="group-create-row">
+                <input type="text" id="groupNameInput" placeholder="グループの名前" maxlength="30">
+                <button id="createGroupButton">作る</button>
+            </div>
+        </div>
     </div>
-</div>
        <div id="mypageArea" hidden>
          <div class="page-header">
            <h2>マイページ</h2>

@@ -242,6 +242,8 @@ const calGrid = document.getElementById("calGrid");
 let calMonth = new Date();
 calMonth.setDate(1);
 
+const groupTitle = document.getElementById("groupTitle");
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -2675,6 +2677,18 @@ wishList.addEventListener("click", async function (event) {
   }
 });
 // ---------- グループ ----------
+// 選んでいるグループの名前を出す（2つ以上あるときだけ切りかえを出す）
+function showGroupTitle() {
+  const group = groups.find(function (g) {
+    return g.id === currentGroupId;
+  });
+  if (group) {
+    groupTitle.textContent = group.name;
+  } else {
+    groupTitle.textContent = "";
+  }
+  groupSelect.hidden = groups.length < 2;
+}
 
 // 自分のグループを読み込んで、選択欄を作る
 async function loadGroups() {
@@ -2716,6 +2730,8 @@ async function loadGroups() {
     currentGroupId = groups[0].id;
   }
   groupSelect.value = currentGroupId;
+  
+  showGroupTitle();
 
   loadGroupWishes();
 }
@@ -2868,6 +2884,7 @@ createGroupButton.addEventListener("click", async function () {
 // グループを選び直したとき
 groupSelect.addEventListener("change", function () {
   currentGroupId = Number(groupSelect.value);
+  showGroupTitle();
   loadGroupWishes();
 });
 

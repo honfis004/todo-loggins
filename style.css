@@ -78,7 +78,6 @@ ul {
     color: #d9776b;
 }
 
-.view-tabs button.active
 .main-tabs button.active {
     background-color: #d9776b;
     color: white;
@@ -1798,4 +1797,141 @@ h2 {
 
 .group-item .delete-button:hover {
     color: #D9776B;
+}
+
+/* タイムラインの投稿を、1つずつ薄い枠で囲む */
+#wishList {
+    padding: 0;
+}
+
+#wishList .wish {
+    margin-bottom: 10px;
+    padding: 12px 36px 12px 14px;
+    border: 1px solid #F3DCD8;
+    border-radius: 14px;
+    background: #FFFFFF;
+}
+
+/* タイムライン：上のタブだけ真ん中 */
+.view-tabs {
+    text-align: center;
+}
+
+.view-tabs button.active {
+    background-color: #B5574A;
+    color: #FFFFFF;
+}
+
+/* 入力欄とボタン（タイムライン・グループ共通） */
+.wish-form,
+.group-wish-form,
+.group-create-row {
+    display: flex;
+    gap: 8px;
+}
+
+.wish-form,
+.group-wish-form {
+    margin: 0 0 12px;
+}
+
+.wish-form input,
+.group-wish-form input,
+.group-create-row input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 2px solid #F3C3BB;
+    border-radius: 20px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 14px;
+}
+
+.wish-form button,
+.group-wish-form button,
+.group-create-row button {
+    flex-shrink: 0;
+    height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 20px;
+    background: #B5574A;
+    color: #FFFFFF;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* グループの上のカード（ここだけ真ん中寄せ） */
+.group-top {
+    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    text-align: center;
+}
+
+.group-title {
+    margin: 0;
+    font-size: 20px;
+}
+
+.group-switch {
+    margin-top: 6px;
+    padding: 4px 8px;
+    border: 1px solid #E8D3D6;
+    border-radius: 12px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 12px;
+}
+
+.group-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.pill-button {
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid #E8A79C;
+    border-radius: 16px;
+    background: #FFFFFF;
+    color: #8a4a40;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.pill-button.quiet {
+    border-color: #E8D3D6;
+    color: #7A5A5F;
+}
+
+.group-empty {
+    margin: 24px 0;
+    text-align: center;
+    font-size: 13px;
+    color: #7A5A5F;
+}
+
+/* 新しいグループを作る（点線のカード） */
+.group-create {
+    margin-top: 24px;
+    padding: 12px 14px;
+    border: 1px dashed #E8C4BE;
+    border-radius: 18px;
+}
+
+.group-create-title {
+    margin: 0 0 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
 }
