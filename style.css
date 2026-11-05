@@ -1245,3 +1245,61 @@ body {
 .theme-choice.selected {
     border-color: #B5574A;
 }
+
+/* ---------- 見た目の仕上げ ---------- */
+body {
+    margin: 0 auto;
+    padding: 16px 16px 0;
+    font-family: "Zen Maru Gothic", sans-serif;
+    color: #3D2A2E;
+}
+
+h1 {
+    margin: 40px 0 24px;
+}
+
+h2 {
+    color: #3D2A2E;
+}
+
+#appArea {
+    text-align: left;
+}
+
+/* ホームの上（日付とベル） */
+.home-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.home-header .home-date {
+    margin: 0;
+}
+
+.bell-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background: var(--card-bg);
+    color: #8a4a40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bell-button svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bell-badge {
+    top: 2px;
+    right: 0;
+}

@@ -3,6 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <title>やることリスト</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="manifest" href="manifest.json">
@@ -10,8 +12,7 @@
         <meta name="theme-color" content="#d9776b">
     </head>
     <body>
-        <h1>今日やること</h1>
-
+        <h1 id="appTitle">今日やること</h1>
         <div id="authArea">
             <input type="email" id="emailInput" placeholder="メールアドレス">
             <input type="password" id="passwordInput" placeholder="パスワード">
@@ -32,15 +33,17 @@
         </div>
 
         <div id="appArea" hidden>
-    
-         <button id="bellButton" class="bell-button">🔔<span id="bellBadge" class="bell-badge" hidden></span></button>
-   
-
-                 <div id="dailyArea">
+        <div id="dailyArea">
 
           <!-- ホーム -->
           <div id="homeView">
-            <p id="homeDate" class="home-date"></p>
+                       <div class="home-header">
+              <p id="homeDate" class="home-date"></p>
+              <button id="bellButton" class="bell-button" aria-label="お知らせ">
+                <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                <span id="bellBadge" class="bell-badge" hidden></span>
+              </button>
+            </div>
 
             <button id="myBottleCard" class="my-bottle-card">
               <div class="bottle">

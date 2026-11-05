@@ -163,6 +163,8 @@ const CARD_COLORS = [
   { key: "white", name: "しろ", color: "#FFFFFF" }
 ];
 
+const appTitle = document.getElementById("appTitle");
+
 let themeBg = "white";
 let themeCard = "pink";
 let chosenBottle = null;
@@ -254,6 +256,7 @@ db.auth.onAuthStateChange(function(event, session) {
         currentUser = null;
         authArea.hidden = false;
         appArea.hidden = true; 
+        appTitle.hidden = false;
         stopRealtime();
     }   
 });
@@ -290,6 +293,7 @@ function showApp(nickname) {
   　bottleArea.hidden = true;
     nicknameArea.hidden = true;
     appArea.hidden = false;
+    appTitle.hidden = true;
     userInfo.textContent = nickname;
     loadTasks();
     loadEveryone();
