@@ -1519,3 +1519,138 @@ h2 {
     color: #3D2A2E;
     border: 1px solid transparent;
 }
+
+/* ---------- かざりの見た目 ---------- */
+.bottle-neck,
+.bottle-body,
+.big-bottle-body {
+    position: relative;
+}
+
+/* キャップの形 */
+.bottle-cap.cap-crown {
+    clip-path: polygon(0 100%, 0 30%, 25% 60%, 50% 0, 75% 60%, 100% 30%, 100% 100%);
+}
+
+.bottle-cap.cap-heart {
+    clip-path: polygon(50% 100%, 0 40%, 10% 8%, 30% 0, 50% 18%, 70% 0, 90% 8%, 100% 40%);
+}
+
+.bottle-cap.cap-round {
+    clip-path: ellipse(50% 50% at 50% 50%);
+}
+
+/* 首かざり：首に巻く帯 */
+.deco-necklace {
+    position: absolute;
+    left: -40%;
+    right: -40%;
+    top: 15%;
+    height: 50%;
+    box-sizing: border-box;
+    border: 2px dotted #FFFFFF;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* チャーム：首の右にさげる丸 */
+.deco-charm {
+    position: absolute;
+    right: -75%;
+    top: 40%;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid #FFFFFF;
+    pointer-events: none;
+}
+
+/* ラメ：ボトルの中のきらきら */
+.deco-lame {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.deco-lame span {
+    position: absolute;
+    width: 6%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+}
+
+/* レース：ボトルの下のほうの点線 */
+.deco-lace {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6%;
+    height: 6%;
+    border-top: 2px dotted;
+    border-bottom: 2px dotted;
+    pointer-events: none;
+}
+
+/* ---------- かざりをえらぶ ---------- */
+.slot-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.slot-tab {
+    height: 34px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 17px;
+    background: var(--card-bg);
+    color: #3D2A2E;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.slot-tab.selected {
+    background: #B5574A;
+    color: #FFFFFF;
+}
+
+.slot-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.slot-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 2px solid var(--card-bg);
+    background: var(--card-bg);
+    color: #3D2A2E;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.slot-item.selected {
+    border-color: #B5574A;
+}
+
+.slot-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #E8D3D6;
+    flex-shrink: 0;
+}
+
+.slot-theme {
+    margin-left: auto;
+    font-size: 11px;
+    color: #7A5A5F;
+}

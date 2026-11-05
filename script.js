@@ -178,7 +178,23 @@ const collectionBack = document.getElementById("collectionBack");
 const themeTabs = document.getElementById("themeTabs");
 const chooseThemeButton = document.getElementById("chooseThemeButton");
 const collectionList = document.getElementById("collectionList");
+const slotTabs = document.getElementById("slotTabs");
+const slotItems = document.getElementById("slotItems");
 
+// かざりをつける場所
+const SLOTS = [
+  { key: "cap", name: "キャップ" },
+  { key: "necklace", name: "首かざり" },
+  { key: "lame", name: "ラメ" },
+  { key: "charm", name: "チャーム" },
+  { key: "lace", name: "レース" }
+];
+
+// ラメの粒の位置（左から何%、上から何%）
+const LAME_SPOTS = [[25, 30], [70, 45], [40, 65], [78, 78], [30, 85]];
+
+let myDeco = {};          // 自分がつけているかざり
+let currentSlot = "cap";  // カスタムで選んでいる場所
 // かざりのテーマ
 const DECO_THEMES = [
   { key: "cute", name: "かわいい", desc: "リボンやハート" },
@@ -309,6 +325,7 @@ async function checkProfile() {
         themeBg = data.theme_bg || "white";
         themeCard = data.theme_card || "pink";
         decoTheme = data.deco_theme || "cute";
+         myDeco = decoOf(data);
         applyTheme();
         showApp(data.nickname);
     } else {
@@ -317,13 +334,13 @@ async function checkProfile() {
     }
 }
 // リスト画面を見せる
-function showApp(nickname) {
-  　bottleArea.hidden = true;
+async function showApp(nickname) {
+    bottleArea.hidden = true;
     nicknameArea.hidden = true;
     appArea.hidden = false;
     appTitle.hidden = true;
     userInfo.textContent = nickname;
-    loadDecorations();
+    await loadDecorations();
     loadTasks();
     loadEveryone();
     startRealtime();
@@ -568,6 +585,8 @@ function renderBottle() {
             line.textContent = "・【" + task.category + "】" + task.text;
             myBottlePending.appendChild(line);
         });
+    applyDecorations(myBottleCard.querySelector(".bottle"), myDeco);
+    applyDecorations(document.querySelector(".big-bottle"), myDeco);
 }
 
 // 日付を「11月5日（木）」の形にする
@@ -713,7 +732,7 @@ tasklist.addEventListener("click", async function (event) {
 async function loadEveryone() {
   const { data: profiles, error: error1 } = await db
     .from("profiles")
-    .select("id, nickname, bottle_color");
+    .select("id, nickname, bottle_color, deco_cap, deco_necklace, deco_lame, deco_charm, deco_lace");
 
   const { data: allTasks, error: error2 } = await db
     .from("tasks")
@@ -964,8 +983,98 @@ async function loadEveryone() {
   }
 }
 
+// IDから、かざりを探す
+function findDecoration(id) {
+  if (!id) {
+    return null;
+  }
+  const found = decorations.find(function (d) {
+    return d.id === id;
+  });
+  return found || null;
+}
+
+// プロフィールから、つけているかざりを取り出す
+function decoOf(profile) {
+  return {
+    cap: profile.deco_cap,
+    necklace: profile.deco_necklace,
+    lame: profile.deco_lame,
+    charm: profile.deco_charm,
+    lace: profile.deco_lace
+  };
+}
+
+// ボトルにかざりをつける（どの大きさのボトルでも使える）
+function applyDecorations(bottle, deco) {
+  if (!bottle || !deco) {
+    return;
+  }
+  const cap = bottle.querySelector(".bottle-cap");
+  const neck = bottle.querySelector(".bottle-neck");
+  const body = bottle.querySelector(".bottle-body, .big-bottle-body");
+
+  // いったん前のかざりを外す
+  bottle.querySelectorAll(".deco-part").forEach(function (el) {
+    el.remove();
+  });
+  cap.classList.remove("cap-crown", "cap-heart", "cap-round");
+  cap.style.background = "";
+
+  // キャップ（色と形）
+  const capItem = findDecoration(deco.cap);
+  if (capItem) {
+    cap.style.background = capItem.color;
+    if (capItem.shape && capItem.shape !== "gem") {
+      cap.classList.add("cap-" + capItem.shape);
+    }
+  }
+
+  // 首かざり
+  const necklace = findDecoration(deco.necklace);
+  if (necklace) {
+    const el = document.createElement("div");
+    el.className = "deco-part deco-necklace";
+    el.style.background = necklace.color;
+    neck.appendChild(el);
+  }
+
+  // チャーム
+  const charm = findDecoration(deco.charm);
+  if (charm) {
+    const el = document.createElement("div");
+    el.className = "deco-part deco-charm";
+    el.style.background = charm.color;
+    neck.appendChild(el);
+  }
+
+  // ラメ
+  const lame = findDecoration(deco.lame);
+  if (lame) {
+    const el = document.createElement("div");
+    el.className = "deco-part deco-lame";
+    LAME_SPOTS.forEach(function (spot) {
+      const dot = document.createElement("span");
+      dot.style.left = spot[0] + "%";
+      dot.style.top = spot[1] + "%";
+      dot.style.background = lame.color;
+      el.appendChild(dot);
+    });
+    body.appendChild(el);
+  }
+
+  // レース
+  const lace = findDecoration(deco.lace);
+  if (lace) {
+    const el = document.createElement("div");
+    el.className = "deco-part deco-lace";
+    el.style.borderColor = lace.color;
+    body.appendChild(el);
+  }
+}
+
 // 小さいボトルを1つ作る
-function makeSmallBottle(colorKey, theirTasks) {
+function makeSmallBottle(colorKey, theirTasks, deco) {
   const bottle = document.createElement("div");
   bottle.className = "bottle";
 
@@ -1002,6 +1111,7 @@ function makeSmallBottle(colorKey, theirTasks) {
     });
 
   bottle.append(cap, collar, neck, body);
+   applyDecorations(bottle, deco);
   return bottle;
 }
 
@@ -1054,7 +1164,7 @@ function renderShelf(items, unlocked, photos) {
       if (unlocked && item.newTasks.length > 0) {
         button.classList.add("glow");
       }
-      button.appendChild(makeSmallBottle(item.profile.bottle_color, item.theirTasks));
+      button.appendChild(makeSmallBottle(item.profile.bottle_color, item.theirTasks, decoOf(item.profile)));
 
       // ボトルをタップ → 達成写真（新着があれば新着だけ）
       button.addEventListener("click", function () {
@@ -1126,7 +1236,7 @@ async function openFriendPage(profile) {
 
   // ボトル
   friendPageBottle.innerHTML = "";
-  friendPageBottle.appendChild(makeSmallBottle(profile.bottle_color, todayTasks || []));
+  friendPageBottle.appendChild(makeSmallBottle(profile.bottle_color, todayTasks || [], decoOf(profile)));
 
   // これまでの達成回数
   const { count } = await db
@@ -1538,7 +1648,7 @@ async function loadPastBottles() {
     if (isFull) {
       button.classList.add("glow");
     }
-    button.appendChild(makeSmallBottle(myBottleColor, dayTasks));
+    button.appendChild(makeSmallBottle(myBottleColor, dayTasks, myDeco));
 
     // タップ → その日の自分のリストへ
     button.addEventListener("click", function () {
@@ -1565,7 +1675,7 @@ async function loadPastBottles() {
 async function loadMyPage() {
   // 今日の自分のボトル
   myPageBottle.innerHTML = "";
-  myPageBottle.appendChild(makeSmallBottle(myBottleColor, tasks));
+  myPageBottle.appendChild(makeSmallBottle(myBottleColor, tasks, myDeco));
 
   // これまでの達成回数（数だけを数える）
   const { count } = await db
@@ -1658,7 +1768,7 @@ cardChoices.addEventListener("click", function (event) {
 function renderCustomize() {
   // 見本のボトル（今日の液体入り）
   customizePreview.innerHTML = "";
-  customizePreview.appendChild(makeSmallBottle(myBottleColor, tasks));
+  customizePreview.appendChild(makeSmallBottle(myBottleColor, tasks, myDeco));
 
   // 色のボタン
   colorChoices.innerHTML = "";
@@ -1680,7 +1790,97 @@ function renderCustomize() {
     button.append(dot, name);
     colorChoices.appendChild(button);
   });
+    renderSlots();
 }
+
+// かざりの場所と、持っているかざりを並べる
+function renderSlots() {
+  // 場所のボタン
+  slotTabs.innerHTML = "";
+  SLOTS.forEach(function (slot) {
+    const button = document.createElement("button");
+    button.className = "slot-tab";
+    button.dataset.key = slot.key;
+    button.textContent = slot.name;
+    if (slot.key === currentSlot) {
+      button.classList.add("selected");
+    }
+    slotTabs.appendChild(button);
+  });
+
+  // 持っているかざり（どのテーマでも）＋「なし」
+  const mine = decorations.filter(function (d) {
+    return d.slot === currentSlot && ownedIds.includes(d.id);
+  });
+  const choices = [{ id: "", name: "なし", color: "#FFFFFF", theme: "" }].concat(mine);
+
+  slotItems.innerHTML = "";
+  choices.forEach(function (d) {
+    const button = document.createElement("button");
+    button.className = "slot-item";
+    button.dataset.id = d.id;
+    if ((myDeco[currentSlot] || "") === d.id) {
+      button.classList.add("selected");
+    }
+
+    const swatch = document.createElement("span");
+    swatch.className = "slot-swatch";
+    swatch.style.background = d.color;
+
+    const name = document.createElement("span");
+    name.textContent = d.name;
+
+    const theme = document.createElement("span");
+    theme.className = "slot-theme";
+    const t = DECO_THEMES.find(function (x) {
+      return x.key === d.theme;
+    });
+    if (t) {
+      theme.textContent = t.name;
+    }
+
+    button.append(swatch, name, theme);
+    slotItems.appendChild(button);
+  });
+
+  if (mine.length === 0) {
+    const note = document.createElement("p");
+    note.className = "collection-note";
+    note.textContent = "まだ持っていないよ。「かざりを集める」で集めよう！";
+    slotItems.appendChild(note);
+  }
+}
+
+// 場所を選ぶ
+slotTabs.addEventListener("click", function (event) {
+  const button = event.target.closest(".slot-tab");
+  if (!button) {
+    return;
+  }
+  currentSlot = button.dataset.key;
+  renderSlots();
+});
+
+// かざりを選ぶ → 保存して、すぐつける
+slotItems.addEventListener("click", async function (event) {
+  const button = event.target.closest(".slot-item");
+  if (!button) {
+    return;
+  }
+  const id = button.dataset.id || null;
+
+  const change = {};
+  change["deco_" + currentSlot] = id;
+  const { error } = await db.from("profiles").update(change).eq("id", currentUser.id);
+  if (error) {
+    alert("かざりをつけられませんでした：" + error.message);
+    return;
+  }
+
+  myDeco[currentSlot] = id;
+  renderCustomize();
+  renderBottle();
+});
 
 // 色をタップ → すぐ保存して、見た目も変える
 colorChoices.addEventListener("click", async function (event) {
@@ -1706,11 +1906,12 @@ colorChoices.addEventListener("click", async function (event) {
 });
 
 // マイページ → カスタム
-customizeOpen.addEventListener("click", function () {
+customizeOpen.addEventListener("click", async function () {
   mypageArea.hidden = true;
   customizeArea.hidden = false;
-  renderCustomize();
   window.scrollTo(0, 0);
+  await loadOwned();
+  renderCustomize();
 });
 
 // カスタム → マイページにもどる
