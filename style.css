@@ -866,3 +866,81 @@ ul {
     font-size: 12px;
     background: #FFFFFF;
 }
+/* 自分のボトル（大きい） */
+.big-bottle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 12px 0 16px;
+}
+
+.big-bottle .bottle-cap {
+    width: 84px;
+    height: 46px;
+}
+
+.big-bottle .bottle-collar {
+    width: 62px;
+    height: 9px;
+}
+
+.big-bottle .bottle-neck {
+    width: 44px;
+    height: 18px;
+}
+
+.big-bottle-body {
+    width: 100%;
+    max-width: 360px;
+    min-height: 440px;
+    box-sizing: border-box;
+    border: 3px solid var(--line);
+    border-bottom-width: 14px;
+    border-radius: 150px 150px 40px 40px / 64px 64px 40px 40px;
+    background: var(--glass);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 46px;
+}
+
+/* ボトルの中のリスト */
+#tasklist {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* まだのタスク：白いカードで浮かぶ */
+#tasklist .task {
+    margin: 0 16px 8px;
+    border-radius: 16px;
+    background: #FFFFFF;
+}
+
+/* 達成したタスク：液体になる */
+#tasklist .task.liquid {
+    margin: 0;
+    border-radius: 0;
+    opacity: 1;
+    color: #3D2A2E;
+}
+
+#tasklist .task.liquid .task-label {
+    text-decoration: none;
+}
+
+/* 液体のいちばん上の層を、下に押し下げる */
+#tasklist .liquid-top {
+    margin-top: auto;
+}
+
+.full-message {
+    text-align: center;
+    color: #8a4a40;
+    font-size: 14px;
+    margin: 0 0 12px;
+}

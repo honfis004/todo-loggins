@@ -59,7 +59,7 @@
             <div id="shelfArea" class="shelf-area"></div>
           </div>
 
-          <!-- 自分のリスト -->
+                   <!-- 自分のリスト -->
           <div id="mineView" hidden>
             <button id="backHome" class="back-button">‹ もどる</button>
 
@@ -69,25 +69,35 @@
               <button id="nextDay">▶</button>
             </div>
 
-            <input type="text" id="taskInput" placeholder="やることを入力">
+            <div class="big-bottle">
+              <div class="bottle-cap"></div>
+              <div class="bottle-collar"></div>
+              <div class="bottle-neck"></div>
+              <div class="big-bottle-body">
+                <p id="fullMessage" class="full-message" hidden>今日のボトル、満タン！</p>
+                <ul id="tasklist"></ul>
+              </div>
+            </div>
 
-            <select id="categorySelect">
-              <option>勉強</option>
-              <option>趣味</option>
-              <option>バイト</option>
-              <option>家事</option>
-              <option>運動</option>
-              <option>その他</option>
-            </select>
+            <div class="add-row">
+              <input type="text" id="taskInput" placeholder="やることを入力">
 
-            <label>
-              <input type="checkbox" id="privateCheck">
-              プライベートモード
-            </label>
+              <select id="categorySelect">
+                <option>勉強</option>
+                <option>趣味</option>
+                <option>バイト</option>
+                <option>家事</option>
+                <option>運動</option>
+                <option>その他</option>
+              </select>
 
-            <button id="addButton">追加</button>
+              <label>
+                <input type="checkbox" id="privateCheck">
+                プライベートモード
+              </label>
 
-            <ul id="tasklist"></ul>
+              <button id="addButton">追加</button>
+            </div>
           </div>
 
                    <!-- フレンドのリスト -->
@@ -95,7 +105,7 @@
             <button id="backHomeFromFriends" class="back-button">‹ もどる</button>
             <div id="everyoneArea"></div>
           </div>
-          
+
          </div>
 
     <div id="wishArea" hidden>

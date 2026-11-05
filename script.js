@@ -127,6 +127,7 @@ const BOTTLE_COLORS = [
 const shelfArea = document.getElementById("shelfArea");
 const friendListView = document.getElementById("friendListView");
 const backHomeFromFriends = document.getElementById("backHomeFromFriends");
+const fullMessage = document.getElementById("fullMessage");
 
 let chosenBottle = null;
 let tasks = [];    
@@ -389,21 +390,36 @@ async function loadTasks() {
 function render() {
   tasklist.innerHTML = "";
 
-  tasks.forEach(function (task) {
+  // まだのタスク（上に浮かぶ）と、達成したタスク（新しいものほど上の層）
+  const pending = tasks.filter(function (t) {
+    return !t.done;
+  });
+  const done = tasks
+    .filter(function (t) {
+      return t.done;
+    })
+    .sort(byCompletedAt)
+    .reverse();
+
+  // まだ → 達成 の順に並べる
+  pending.concat(done).forEach(function (task) {
     const li = document.createElement("li");
     li.className = "task";
     li.dataset.id = task.id;
-    if (task.done) {
-      li.classList.add("done");
-    }
 
     let text = "【" + task.category + "】" + task.text;
     if (task.is_private) {
       text = "🗝 " + text;
     }
 
-    // 左：達成の証拠（写真か💧）
+    // 達成したものは、カテゴリーの色の液体にする
     if (task.done) {
+      li.classList.add("done", "liquid");
+      li.style.background = CATEGORY_COLORS[task.category];
+      if (task === done[0]) {
+        li.classList.add("liquid-top");
+      }
+      // 左：達成の証拠（写真か💧）
       li.appendChild(makeProof(task.photo, text));
     }
 
@@ -413,10 +429,10 @@ function render() {
     label.textContent = text;
     li.appendChild(label);
 
-        // 右：届いたリアクション
+    // 右：届いたリアクション
     li.appendChild(makeReactionBubbles(task.reactions));
 
-    // 右：削除ボタン（リアクションはあとでこのあたりに並べる）
+    // 右：削除ボタン
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "×";
     deleteButton.className = "deleteButton";
@@ -424,6 +440,9 @@ function render() {
 
     tasklist.appendChild(li);
   });
+
+  // 全部達成したら「満タン！」
+  fullMessage.hidden = !(tasks.length > 0 && pending.length === 0);
 
   renderBottle();
 }
@@ -435,8 +454,8 @@ function renderBottle() {
         return c.key === myBottleColor;
     });
     if (color) {
-        myBottleCard.style.setProperty("--line", color.line);
-        myBottleCard.style.setProperty("--glass", color.glass);
+        dailyArea.style.setProperty("--line", color.line);
+        dailyArea.style.setProperty("--glass", color.glass);
     }
 
     // 達成したタスク（達成した順）
