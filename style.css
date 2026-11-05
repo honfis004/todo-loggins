@@ -933,9 +933,31 @@ ul {
     text-decoration: none;
 }
 
-/* 液体のいちばん上の層を、下に押し下げる */
-#tasklist .task.liquid-top {
-    margin-top: auto;
+/* 波：液体のいちばん上でゆらゆら動く（ここで液体を底に押し下げる） */
+#tasklist .liquid-wave {
+    margin: auto 0 -1px;
+    padding: 0;
+    height: 16px;
+    border-radius: 0;
+    background: none;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.liquid-wave svg {
+    display: block;
+    width: 200%;
+    height: 16px;
+    animation: wave 3s linear infinite;
+}
+
+@keyframes wave {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
 }
 
 .full-message {
@@ -2118,3 +2140,36 @@ h2 {
     padding: 0 14px;
     border: 2px solid #F3C3BB;
     border-radius: 22px;
+}
+
+/* ---------- 自分のボトルの画面を1画面に収める ---------- */
+
+/* 「もどる」は出さない */
+#backHome {
+    display: none;
+}
+
+/* 画面の高さから、上の余白と下のメニューのぶんを引いた高さにする */
+#mineView {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 16px - 90px);
+}
+
+#mineView .date-nav {
+    margin: 0 0 4px;
+    flex-shrink: 0;
+}
+
+/* ボトルが、残りの高さをぜんぶ使う */
+#mineView .big-bottle {
+    flex: 1;
+    min-height: 0;
+    margin: 4px 0 8px;
+}
+
+#mineView .big-bottle-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}

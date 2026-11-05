@@ -518,6 +518,17 @@ function render() {
 
   // まだ → 達成 の順に並べる
   pending.concat(done).forEach(function (task) {
+        // 液体のいちばん上の層の前に、波を入れる
+    if (task === done[0]) {
+      const wave = document.createElement("li");
+      wave.className = "liquid-wave";
+      wave.innerHTML =
+        '<svg viewBox="0 0 680 16" preserveAspectRatio="none">' +
+        '<path d="M0 8 Q 42.5 0 85 8 T 170 8 T 255 8 T 340 8 T 425 8 T 510 8 T 595 8 T 680 8 V16 H0 Z"></path>' +
+        "</svg>";
+      wave.querySelector("path").setAttribute("fill", CATEGORY_COLORS[task.category]);
+      tasklist.appendChild(wave);
+    }
     const li = document.createElement("li");
     li.className = "task";
     li.dataset.id = task.id;
@@ -640,6 +651,78 @@ myBottleCard.addEventListener("click", function () {
 backHome.addEventListener("click", function () {
     showHome();
 });
+
+// 左から右にスワイプして、ホームにもどる
+function addSwipeBack(view) {
+  let startX = 0;
+  let startY = 0;
+  let moving = false; // 横にスワイプしているところか
+  let dx = 0;         // 右にどれだけ動いたか
+
+  // 指がふれたとき：はじめの位置をおぼえる
+  view.addEventListener(
+    "touchstart",
+    function (event) {
+      const touch = event.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      moving = false;
+      dx = 0;
+      view.style.transition = "none";
+    },
+    { passive: true }
+  );
+
+  // 指が動いているとき：横向きなら、画面を指についてこさせる
+  view.addEventListener(
+    "touchmove",
+    function (event) {
+      const touch = event.touches[0];
+      const x = touch.clientX - startX;
+      const y = touch.clientY - startY;
+
+      if (!moving) {
+        // 横の動きが縦より大きいときだけ、スワイプとみなす
+        if (Math.abs(x) > 10 && Math.abs(x) > Math.abs(y)) {
+          moving = true;
+        } else {
+          return;
+        }
+      }
+
+      dx = Math.max(0, x); // 左には動かさない
+      view.style.transform = "translateX(" + dx + "px)";
+    },
+    { passive: true }
+  );
+
+  // 指をはなしたとき：80px 以上ならホームへ、足りなければ元にもどす
+  function finish() {
+    if (!moving) {
+      return;
+    }
+    moving = false;
+    view.style.transition = "transform 0.2s ease-out";
+
+    if (dx > 80) {
+      view.style.transform = "translateX(100%)";
+      setTimeout(function () {
+        view.style.transition = "none";
+        view.style.transform = "";
+        showHome();
+      }, 200);
+    } else {
+      view.style.transform = "";
+    }
+  }
+
+  view.addEventListener("touchend", finish);
+  view.addEventListener("touchcancel", finish);
+}
+
+addSwipeBack(mineView);
+addSwipeBack(friendListView);
+addSwipeBack(friendPageView);
 
 // ＋ → 入力のポップアップを開く
 openAddSheet.addEventListener("click", function () {
