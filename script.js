@@ -277,6 +277,9 @@ let allProfiles = []; // 名前をタップしたときに、その人のマイ�
 const mineDate = document.getElementById("mineDate");
 const mineSub = document.getElementById("mineSub");
 
+let wasFull = false; // 前に描いたとき満タンだったか（ブレンドの動きは、満タンになった瞬間だけ）
+
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -542,9 +545,16 @@ function render() {
     .sort(byCompletedAt)
     .reverse();
 
+  // 液体をまとめる箱（満タンのときは、ここが1つのグラデーションになる）
+  const liquidBox = document.createElement("li");
+  liquidBox.className = "liquid-box";
+  const liquidRows = document.createElement("ul");
+  liquidRows.className = "liquid-rows";
+  liquidBox.appendChild(liquidRows);
+
   // まだ → 達成 の順に並べる
   pending.concat(done).forEach(function (task) {
-    // 液体のいちばん上の層の前に、波を入れる
+    // 液体のいちばん上の層の前に、波と液体の箱を入れる
     if (task === done[0]) {
       const wave = document.createElement("li");
       wave.className = "liquid-wave";
@@ -554,13 +564,14 @@ function render() {
         "</svg>";
       wave.querySelector("path").setAttribute("fill", CATEGORY_COLORS[task.category] + LIQUID_ALPHA);
       tasklist.appendChild(wave);
+      tasklist.appendChild(liquidBox);
     }
 
     const li = document.createElement("li");
     li.className = "task";
     li.dataset.id = task.id;
-   
-        // まだのタスク：左に白い丸
+
+    // まだのタスク：左に白い丸
     if (!task.done) {
       const circle = document.createElement("span");
       circle.className = "pending-circle";
@@ -572,15 +583,16 @@ function render() {
       text = "🗝 " + text;
     }
 
-    // 達成したものは、カテゴリーの色の液体にする（すき通る）
+    // 達成したものは、カテゴリーの色の液体にする（色は --row に入れる）
     if (task.done) {
       li.classList.add("done", "liquid");
-      li.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
-         // 左：写真があるときだけ、小さな写真
+      li.style.setProperty("--row", CATEGORY_COLORS[task.category] + LIQUID_ALPHA);
+      // 左：写真があるときだけ、小さな写真
       if (task.photo) {
         li.appendChild(makeProof(task.photo, text));
       }
     }
+
     // まんなか：タスクの文字
     const label = document.createElement("span");
     label.className = "task-label";
@@ -596,25 +608,50 @@ function render() {
     deleteButton.className = "deleteButton";
     li.appendChild(deleteButton);
 
-    tasklist.appendChild(li);
+    // 達成したものは液体の箱へ、まだのものはそのままリストへ
+    if (task.done) {
+      liquidRows.appendChild(li);
+    } else {
+      tasklist.appendChild(li);
+    }
   });
 
-    // 上の日付「11月6日のやること」と「きょう ・ 2 / 4」
+  // 上の日付「11月6日」と「きょう ・ 2 / 4」
   const d = new Date(selectedDate + "T00:00:00");
-  mineDate.textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日のやること";
+  mineDate.textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日";
   let sub = done.length + " / " + tasks.length;
   if (dayWord(selectedDate)) {
     sub = dayWord(selectedDate) + " ・ " + sub;
   }
   mineSub.textContent = sub;
-  
-  // 全部達成したら、ボトルのふちをシルバーに光らせる
+
+  // 満タンなら、液体がブレンドされて1つのグラデーションに
   const isFull = tasks.length > 0 && pending.length === 0;
-  document.querySelector(".big-bottle-body").classList.toggle("full", isFull);
-  myBottleBody.classList.toggle("full", isFull);
+  if (isFull) {
+    // 下（最初に達成）→ 上（最後に達成）の順の色
+    const colors = done
+      .slice()
+      .reverse()
+      .map(function (t) {
+        return CATEGORY_COLORS[t.category] + LIQUID_ALPHA;
+      });
+    let blend = colors[0];
+    if (colors.length > 1) {
+      blend = "linear-gradient(to top, " + colors.join(", ") + ")";
+    }
+    liquidBox.style.setProperty("--blend", blend);
+    liquidBox.classList.add("blended");
+
+    // 満タンになった瞬間だけ、ゆっくり溶け合う動きをつける
+    if (!wasFull) {
+      liquidBox.classList.add("blend-in");
+    }
+  }
+  wasFull = isFull;
 
   renderBottle();
 }
+
 // 自分のボトルを描く
 function renderBottle() {
     // 自分のボトルの色を CSS 変数に入れる
@@ -640,16 +677,31 @@ function renderBottle() {
         })
         .sort(byCompletedAt);
 
-    // 液体の層をつくる（すき通る色）
+       // 液体の層をつくる（満タンなら、1つのグラデーションに）
     myBottleBody.innerHTML = "";
-    doneTasks.forEach(function (task) {
+    const bottleFull = tasks.length > 0 && doneTasks.length === tasks.length;
+    if (bottleFull) {
+        const colors = doneTasks.map(function (t) {
+            return CATEGORY_COLORS[t.category] + LIQUID_ALPHA;
+        });
         const layer = document.createElement("div");
         layer.className = "bottle-layer";
-        layer.style.height = 100 / tasks.length + "%";
-        layer.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
+        layer.style.height = "100%";
+        if (colors.length > 1) {
+            layer.style.background = "linear-gradient(to top, " + colors.join(", ") + ")";
+        } else {
+            layer.style.background = colors[0];
+        }
         myBottleBody.appendChild(layer);
-    });
-
+    } else {
+        doneTasks.forEach(function (task) {
+            const layer = document.createElement("div");
+            layer.className = "bottle-layer";
+            layer.style.height = 100 / tasks.length + "%";
+            layer.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
+            myBottleBody.appendChild(layer);
+        });
+    }
     // いちばん上の層に、小さい波
     if (doneTasks.length > 0) {
         const top = doneTasks[doneTasks.length - 1];
@@ -942,6 +994,9 @@ tasklist.addEventListener("click", async function (event) {
   const task = tasks.find(function (t) {
     return t.id === id;
   });
+    if (!task) {
+    return;
+  }
 
   // 削除ボタン
   if (event.target.classList.contains("deleteButton")) {

@@ -2445,19 +2445,24 @@ h3,
     user-select: none;
 }
 
-/* ---------- 棚を銀色に ---------- */
+/* ---------- 棚：うすいガラスの板 ---------- */
 .shelf-board {
-    background: linear-gradient(#F4F5F7, #C9CED5);
-    border-top: 3px solid #FFFFFF;
-    box-shadow: 0 5px 9px rgba(80, 90, 105, 0.18);
+    background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(233, 236, 240, 0.9));
+    border-top: 1px solid #FFFFFF;
+    border-bottom: 1px solid #DDE1E6;
+    box-shadow: 0 8px 12px -8px rgba(60, 70, 85, 0.35);
 }
 
-/* 名前のプレートも銀色に */
+/* 名前のプレート：白い小さな丸いラベル */
 .shelf-plate {
-    border: 1px solid #AEB4BC;
-    background: linear-gradient(#FFFFFF, #E4E7EB);
-    box-shadow: 0 1px 2px rgba(80, 90, 105, 0.25);
-    color: #4A4F57;
+    padding: 1px 10px;
+    border: none;
+    border-radius: 999px;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 1px #E3E6EA;
+    color: #7A808A;
+    font-size: 10px;
+    letter-spacing: 0.05em;
 }
 /* ---------- 入力欄を画面の下に ---------- */
 .wish-form,
@@ -2792,12 +2797,7 @@ h3,
     background: rgba(255, 255, 255, 0.55);
 }
 
-/* 満タンの日：ボトルのふちがシルバーに光る */
-.big-bottle-body.full,
-#myBottleBody.full {
-    border-color: #C3CAD2;
-    animation: silver-glow 2s ease-in-out infinite;
-}
+
 
 @keyframes silver-glow {
     0%, 100% {
@@ -2806,4 +2806,77 @@ h3,
     50% {
         box-shadow: 0 0 16px rgba(195, 202, 210, 1), 0 0 4px rgba(255, 255, 255, 0.9);
     }
+}
+
+/* タイムライン：枠ではなく、線で区切る */
+#wishList .wish {
+    margin: 0;
+    padding: 14px 36px 14px 4px;
+    border: none;
+    border-bottom: 1px solid #F3DCD8;
+    border-radius: 0;
+    background: transparent;
+}
+
+/* 達成した投稿も、背景の色はつけない（🎉で区別） */
+#wishList .wish.wish-done {
+    background: transparent;
+}
+
+/* ---------- 液体の箱（満タンでブレンド） ---------- */
+#tasklist .liquid-box {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+}
+
+.liquid-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* 液体の色は --row から */
+#tasklist .task.liquid {
+    background: var(--row);
+}
+
+/* ブレンドの色（グラデーション）を、箱のうしろに */
+.liquid-box::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--blend);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 満タン：グラデーションを出して、1行ずつの色は透明に */
+.liquid-box.blended::before {
+    opacity: 1;
+}
+
+.liquid-box.blended .task.liquid {
+    background: transparent;
+}
+
+/* 満タンになった瞬間：ゆっくり溶け合う */
+.liquid-box.blend-in::before {
+    animation: blend-fade 1.6s ease-in-out;
+}
+
+.liquid-box.blend-in .task.liquid {
+    animation: row-fade 1.6s ease-in-out;
+}
+
+@keyframes blend-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes row-fade {
+    from { background-color: var(--row); }
+    to { background-color: transparent; }
 }
