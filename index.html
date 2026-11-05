@@ -2,7 +2,7 @@
 <html lang="ja">
     <head>
         <meta charset="UTF-8">
-        <title>やることリスト</title>
+        <title>dropIn</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="style.css">
@@ -12,7 +12,7 @@
         <meta name="theme-color" content="#d9776b">
     </head>
     <body>
-        <h1 id="appTitle">今日やること</h1>
+        <h1 id="appTitle">dropIn</h1>
         <div id="authArea">
             <input type="email" id="emailInput" placeholder="メールアドレス">
             <input type="password" id="passwordInput" placeholder="パスワード">
@@ -171,8 +171,8 @@
             <ul id="groupWishList"></ul>
         </div>
 
-        <div class="group-create">
-            <p class="group-create-title">新しいグループを作る</p>
+               <div id="groupCreateBox" class="group-create closed">
+            <button id="groupCreateToggle" class="group-create-title">＋ 新しいグループを作る</button>
             <div class="group-create-row">
                 <input type="text" id="groupNameInput" placeholder="グループの名前" maxlength="30">
                 <button id="createGroupButton">作る</button>

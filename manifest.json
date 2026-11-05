@@ -1,6 +1,6 @@
 {
-  "name": "やることリスト",
-  "short_name": "やること",
+  "name": "dropIn",
+  "short_name": "dropIn",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#fdf0ec",

@@ -244,6 +244,9 @@ calMonth.setDate(1);
 
 const groupTitle = document.getElementById("groupTitle");
 
+const groupCreateBox = document.getElementById("groupCreateBox");
+const groupCreateToggle = document.getElementById("groupCreateToggle");
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -2706,6 +2709,7 @@ async function loadGroups() {
   groupSelect.innerHTML = "";
 
   if (groups.length === 0) {
+    groupCreateBox.classList.remove("closed");
     currentGroupId = null;
     noGroupMessage.hidden = false;
     groupContent.hidden = true;
@@ -2862,7 +2866,13 @@ async function loadGroupWishes() {
     groupWishList.appendChild(message);
   }
 }
-
+// 「＋ 新しいグループを作る」をタップ → 開く・閉じる
+groupCreateToggle.addEventListener("click", function () {
+  groupCreateBox.classList.toggle("closed");
+  if (!groupCreateBox.classList.contains("closed")) {
+    groupNameInput.focus();
+  }
+});
 // グループを作る
 createGroupButton.addEventListener("click", async function () {
   const name = groupNameInput.value.trim();
@@ -2877,6 +2887,7 @@ createGroupButton.addEventListener("click", async function () {
   }
 
   groupNameInput.value = "";
+  groupCreateBox.classList.add("closed");
   currentGroupId = newId;
   loadGroups();
 });
