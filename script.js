@@ -424,7 +424,7 @@ function render() {
     tasklist.appendChild(li);
   });
 
-    renderBottle();
+  renderBottle();
 }
 
 // 自分のボトルを描く
