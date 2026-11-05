@@ -168,7 +168,7 @@ let themeCard = "pink";
 let chosenBottle = null;
 let tasks = [];    
 let currentUser  = null;
-let channel =ckpro null;
+let channel = null;
 let viewMode = "friends"; // "friends" か "everyone"
 let groups = [];
 let currentGroupId = null;
@@ -279,7 +279,6 @@ async function checkProfile() {
         themeBg = data.theme_bg || "white";
         themeCard = data.theme_card || "pink";
         applyTheme();
-        showApp(data.nickname);
         showApp(data.nickname);
     } else {
         nicknameArea.hidden = false;
@@ -1558,6 +1557,7 @@ openNotificationSettings.addEventListener("click", function () {
 // 下のメニューの切り替え
 function showSection(name) {
   settingsArea.hidden = true;
+  customizeArea.hidden = true;
   dailyArea.hidden = name !== "daily";
   wishArea.hidden = name !== "wish";
   groupArea.hidden = name !== "group";
