@@ -164,6 +164,14 @@ const CARD_COLORS = [
 ];
 
 const appTitle = document.getElementById("appTitle");
+const friendPageView = document.getElementById("friendPageView");
+const backFromFriendPage = document.getElementById("backFromFriendPage");
+const friendPageBottle = document.getElementById("friendPageBottle");
+const friendName = document.getElementById("friendName");
+const friendStats = document.getElementById("friendStats");
+const friendTodayList = document.getElementById("friendTodayList");
+const friendWishList = document.getElementById("friendWishList");
+const friendPhotos = document.getElementById("friendPhotos");
 
 let themeBg = "white";
 let themeCard = "pink";
@@ -553,6 +561,7 @@ function showHome() {
   homeView.hidden = false;
   mineView.hidden = true;
   friendListView.hidden = true;
+   friendPageView.hidden = true;
   window.scrollTo(0, 0);
 }
 
@@ -812,7 +821,11 @@ async function loadEveryone() {
     const title = document.createElement("h3");
     title.textContent =
       profile.nickname + " (" + doneCount + "/" + theirTasks.length + ")";
-    header.appendChild(title);
+        title.classList.add("friend-link");
+    title.addEventListener("click", function () {
+      openFriendPage(profile);
+    });
+      header.appendChild(title);
 
     if (photoTasks.length > 0) {
       const mark = document.createElement("button");
@@ -1008,6 +1021,9 @@ function renderShelf(items, unlocked, photos) {
       const name = document.createElement("span");
       name.className = "shelf-name";
       name.textContent = item.profile.nickname;
+            name.addEventListener("click", function () {
+        openFriendPage(item.profile);
+      });
 
       const button = document.createElement("button");
       button.className = "shelf-bottle";
@@ -1060,6 +1076,154 @@ function renderShelf(items, unlocked, photos) {
     shelfArea.appendChild(row);
   }
 }
+
+// 「まだないよ」のような1行のお知らせを作る
+function emptyNote(text) {
+  const li = document.createElement("li");
+  li.className = "empty-note";
+  li.textContent = text;
+  return li;
+}
+
+// フレンドのマイページを開く
+async function openFriendPage(profile) {
+  homeView.hidden = true;
+  mineView.hidden = true;
+  friendListView.hidden = true;
+  friendPageView.hidden = false;
+  window.scrollTo(0, 0);
+
+  friendName.textContent = profile.nickname;
+
+  // その日のタスク
+  const { data: todayTasks } = await db
+    .from("tasks")
+    .select("*")
+    .eq("user_id", profile.id)
+    .eq("task_date", selectedDate)
+    .order("created_at");
+
+  // ボトル
+  friendPageBottle.innerHTML = "";
+  friendPageBottle.appendChild(makeSmallBottle(profile.bottle_color, todayTasks || []));
+
+  // これまでの達成回数
+  const { count } = await db
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", profile.id)
+    .eq("done", true);
+  friendStats.textContent = "これまでの達成 " + (count || 0) + "回";
+
+  // きょうのやること（自分が書いていない日はぼかす）
+  const unlocked = tasks.length > 0;
+  friendTodayList.innerHTML = "";
+  friendTodayList.classList.toggle("locked-list", !unlocked);
+  if (!todayTasks || todayTasks.length === 0) {
+    friendTodayList.appendChild(emptyNote("まだリストがないよ"));
+  } else {
+    todayTasks.forEach(function (task) {
+      const li = document.createElement("li");
+      li.className = "task";
+      if (task.done) {
+        li.classList.add("done");
+        li.style.background = CATEGORY_COLORS[task.category];
+      }
+      if (task.is_private) {
+        li.textContent = "【" + task.category + "】ひみつ！";
+      } else {
+        li.textContent = "【" + task.category + "】" + task.text;
+      }
+      friendTodayList.appendChild(li);
+    });
+  }
+
+  // やってみたいこと（新しい10こ）
+  const { data: wishes } = await db
+    .from("wishes")
+    .select("text, done")
+    .eq("user_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  friendWishList.innerHTML = "";
+  if (!wishes || wishes.length === 0) {
+    friendWishList.appendChild(emptyNote("まだないよ"));
+  } else {
+    wishes.forEach(function (wish) {
+      const li = document.createElement("li");
+      if (wish.done) {
+        li.textContent = "🎉 " + wish.text;
+      } else {
+        li.textContent = wish.text;
+      }
+      friendWishList.appendChild(li);
+    });
+  }
+
+  // これまでの写真（新しい30こ）
+  const { data: doneTasks } = await db
+    .from("tasks")
+    .select("*")
+    .eq("user_id", profile.id)
+    .eq("done", true)
+    .order("completed_at", { ascending: false })
+    .limit(30);
+  const ids = (doneTasks || []).map(function (t) {
+    return t.id;
+  });
+  const photos = await getPhotos(ids);
+  const photoTasks = (doneTasks || []).filter(function (t) {
+    return photos[t.id];
+  });
+
+  // 自分がリストを書いた日だけ、写真が見られる
+  const dates = photoTasks.map(function (t) {
+    return t.task_date;
+  });
+  let myDates = [];
+  if (dates.length > 0) {
+    const { data: myRows } = await db
+      .from("tasks")
+      .select("task_date")
+      .eq("user_id", currentUser.id)
+      .in("task_date", dates);
+    myDates = (myRows || []).map(function (r) {
+      return r.task_date;
+    });
+  }
+  const openable = photoTasks.filter(function (t) {
+    return myDates.includes(t.task_date);
+  });
+
+  friendPhotos.innerHTML = "";
+  if (photoTasks.length === 0) {
+    const note = document.createElement("p");
+    note.className = "empty-note";
+    note.textContent = "まだ写真がないよ";
+    friendPhotos.appendChild(note);
+  }
+  photoTasks.forEach(function (task) {
+    const img = document.createElement("img");
+    img.src = photos[task.id].url;
+    img.alt = "達成の写真";
+    const canOpen = myDates.includes(task.task_date);
+    if (!canOpen) {
+      img.classList.add("locked");
+    }
+    img.addEventListener("click", function () {
+      if (!canOpen) {
+        alert("この日の自分のリストを書くと見られるよ！");
+        return;
+      }
+      openViewer(toViewerPhotos(openable, profile.nickname, photos), openable.indexOf(task));
+    });
+    friendPhotos.appendChild(img);
+  });
+}
+
+backFromFriendPage.addEventListener("click", function () {
+  showHome();
+});
 
 // 棚の空いているところをタップ → フレンドのリスト
 shelfArea.addEventListener("click", function (event) {
