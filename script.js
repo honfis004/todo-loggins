@@ -127,7 +127,6 @@ const BOTTLE_COLORS = [
 const shelfArea = document.getElementById("shelfArea");
 const friendListView = document.getElementById("friendListView");
 const backHomeFromFriends = document.getElementById("backHomeFromFriends");
-const fullMessage = document.getElementById("fullMessage");
 const settingsOpen = document.getElementById("settingsOpen");
 const settingsArea = document.getElementById("settingsArea");
 const settingsBack = document.getElementById("settingsBack");
@@ -274,6 +273,9 @@ const viewerStage = document.getElementById("viewerStage");
 const viewerCategory = document.getElementById("viewerCategory");
 
 let allProfiles = []; // 名前をタップしたときに、その人のマイページを開くため
+
+const mineDate = document.getElementById("mineDate");
+const mineSub = document.getElementById("mineSub");
 
 function toDateString(d) {
     const year = d.getFullYear();
@@ -557,6 +559,13 @@ function render() {
     const li = document.createElement("li");
     li.className = "task";
     li.dataset.id = task.id;
+   
+        // まだのタスク：左に白い丸
+    if (!task.done) {
+      const circle = document.createElement("span");
+      circle.className = "pending-circle";
+      li.appendChild(circle);
+    }
 
     let text = "【" + task.category + "】" + task.text;
     if (task.is_private) {
@@ -567,10 +576,11 @@ function render() {
     if (task.done) {
       li.classList.add("done", "liquid");
       li.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
-      // 左：達成の証拠（写真か💧）
-      li.appendChild(makeProof(task.photo, text));
+         // 左：写真があるときだけ、小さな写真
+      if (task.photo) {
+        li.appendChild(makeProof(task.photo, text));
+      }
     }
-
     // まんなか：タスクの文字
     const label = document.createElement("span");
     label.className = "task-label";
@@ -589,12 +599,22 @@ function render() {
     tasklist.appendChild(li);
   });
 
-  // 全部達成したら「満タン！」
-  fullMessage.hidden = !(tasks.length > 0 && pending.length === 0);
+    // 上の日付「11月6日のやること」と「きょう ・ 2 / 4」
+  const d = new Date(selectedDate + "T00:00:00");
+  mineDate.textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日のやること";
+  let sub = done.length + " / " + tasks.length;
+  if (dayWord(selectedDate)) {
+    sub = dayWord(selectedDate) + " ・ " + sub;
+  }
+  mineSub.textContent = sub;
+  
+  // 全部達成したら、ボトルのふちをシルバーに光らせる
+  const isFull = tasks.length > 0 && pending.length === 0;
+  document.querySelector(".big-bottle-body").classList.toggle("full", isFull);
+  myBottleBody.classList.toggle("full", isFull);
 
   renderBottle();
 }
-
 // 自分のボトルを描く
 function renderBottle() {
     // 自分のボトルの色を CSS 変数に入れる
@@ -643,13 +663,11 @@ function renderBottle() {
         myBottleBody.appendChild(wave);
     }
 
-    // 達成の数
+       // 達成の数（「3 / 5」だけ）
     if (tasks.length === 0) {
         myBottleCount.textContent = "まだリストがないよ";
     } else {
-        const percent = Math.round((doneTasks.length * 100) / tasks.length);
-        myBottleCount.textContent =
-            doneTasks.length + " / " + tasks.length + " 達成 ・ " + percent + "%";
+        myBottleCount.textContent = doneTasks.length + " / " + tasks.length;
     }
 
     // まだのタスク（白丸を押すと達成）を3つまで
@@ -693,12 +711,9 @@ function renderBottle() {
     myReactions.innerHTML = "";
     if (todayReactions.length === 0) {
         myReactions.hidden = true;
-    } else {
+        } else {
         myReactions.hidden = false;
-        const label = document.createElement("span");
-        label.className = "home-reactions-label";
-        label.textContent = "もらったリアクション";
-        myReactions.append(makeReactionBubbles(todayReactions), label);
+        myReactions.appendChild(makeReactionBubbles(todayReactions));
     }
 
     // かざり
@@ -713,6 +728,22 @@ function formatHomeDate(dateString) {
     return (d.getMonth() + 1) + "月" + d.getDate() + "日（" + days[d.getDay()] + "）";
 }
 
+// 「きょう・きのう・あした」を出す（それ以外は空っぽ）
+function dayWord(dateString) {
+    const day = new Date(dateString + "T00:00:00");
+    const today = new Date(toDateString(new Date()) + "T00:00:00");
+    const diff = Math.round((day - today) / (24 * 60 * 60 * 1000));
+    if (diff === 0) {
+        return "きょう";
+    }
+    if (diff === -1) {
+        return "きのう";
+    }
+    if (diff === 1) {
+        return "あした";
+    }
+    return "";
+}
 // ホーム ⇔ 自分のリスト
 function showHome() {
   homeView.hidden = false;

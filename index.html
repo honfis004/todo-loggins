@@ -53,10 +53,9 @@
                 <div class="bottle-neck"></div>
                 <div id="myBottleBody" class="bottle-body"></div>
               </button>
-              <div class="my-bottle-info">
-                <strong>じぶん</strong>
-                <span id="myBottleCount"></span>
+                            <div class="my-bottle-info">
                 <ul id="myBottlePending" class="home-pending"></ul>
+                <span id="myBottleCount" class="home-count"></span>
                 <button id="myReactions" class="home-reactions" hidden></button>
               </div>
               <button id="homeAddButton" class="home-add" aria-label="やることを追加">＋</button>
@@ -69,10 +68,16 @@
           <div id="mineView" hidden>
             <button id="backHome" class="back-button">‹ もどる</button>
 
-            <div class="date-nav">
-              <button id="prevDay">◀</button>
-              <input type="date" id="dateInput">
-              <button id="nextDay">▶</button>
+                       <div class="mine-header">
+              <button id="prevDay" class="day-arrow" aria-label="前の日">‹</button>
+              <div class="mine-title">
+                <label class="mine-date-label">
+                  <span id="mineDate"></span>
+                  <input type="date" id="dateInput" class="date-hidden">
+                </label>
+                <span id="mineSub" class="mine-sub"></span>
+              </div>
+              <button id="nextDay" class="day-arrow" aria-label="次の日">›</button>
             </div>
 
             <div class="big-bottle">
@@ -80,7 +85,6 @@
               <div class="bottle-collar"></div>
               <div class="bottle-neck"></div>
               <div class="big-bottle-body">
-                <p id="fullMessage" class="full-message" hidden>今日のボトル、満タン！</p>
                 <ul id="tasklist"></ul>
               </div>
             </div>
@@ -332,7 +336,7 @@
                 <button id="viewerSelfie" aria-label="自撮りで送る">🤳</button>
             </div>
         </div>
-        
+
         <div id="reactionMenu" class="overlay" hidden>
          <div class="sheet">
         <p id="reactionTitle"></p>
