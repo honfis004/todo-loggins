@@ -2729,7 +2729,7 @@ async function loadWishes() {
     const rewishButton = document.createElement("button");
     rewishButton.className = "rewish-button";
     if (isMine) {
-      rewishButton.textContent = "⇄" + rewishUsers.length;
+      rewishButton.textContent = "⇄"+ rewishUsers.length;
     } else if (rewishedByMe) {
       rewishButton.classList.add("rewished");
       rewishButton.textContent = "⇄ Rewished " + rewishUsers.length;

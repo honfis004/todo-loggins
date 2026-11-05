@@ -2200,3 +2200,20 @@ h2 {
     min-height: 0;
     overflow-y: auto;
 }
+
+/* タイムラインの削除ボタン：投稿の右上に小さく */
+#wishList .delete-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    padding: 4px;
+    color: #CCCCCC;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+#wishList .delete-button:hover {
+    color: #D9776B;
+}
