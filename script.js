@@ -137,6 +137,11 @@ const myStats = document.getElementById("myStats");
 const myCodeText = document.getElementById("myCodeText");
 const pastBottles = document.getElementById("pastBottles");
 const pastEmpty = document.getElementById("pastEmpty");
+const customizeOpen = document.getElementById("customizeOpen");
+const customizeArea = document.getElementById("customizeArea");
+const customizeBack = document.getElementById("customizeBack");
+const customizePreview = document.getElementById("customizePreview");
+const colorChoices = document.getElementById("colorChoices");
 
 let chosenBottle = null;
 let tasks = [];    
@@ -1357,13 +1362,80 @@ async function loadMyPage() {
  
   const fullDays = await loadPastBottles();
   myStats.textContent = "これまでの達成 " + (count || 0) + "回 ・ 満タン " + fullDays + "日";
-  
+
   // フレンドコード
   const code = await getMyCode();
   if (code) {
     myCodeText.textContent = code;
   }
 }
+
+// カスタムの画面を描く
+function renderCustomize() {
+  // 見本のボトル（今日の液体入り）
+  customizePreview.innerHTML = "";
+  customizePreview.appendChild(makeSmallBottle(myBottleColor, tasks));
+
+  // 色のボタン
+  colorChoices.innerHTML = "";
+  BOTTLE_COLORS.forEach(function (color) {
+    const button = document.createElement("button");
+    button.className = "color-choice";
+    button.dataset.key = color.key;
+    if (color.key === myBottleColor) {
+      button.classList.add("selected");
+    }
+
+    const dot = document.createElement("span");
+    dot.className = "color-dot";
+    dot.style.background = color.line;
+
+    const name = document.createElement("span");
+    name.textContent = color.name;
+
+    button.append(dot, name);
+    colorChoices.appendChild(button);
+  });
+}
+
+// 色をタップ → すぐ保存して、見た目も変える
+colorChoices.addEventListener("click", async function (event) {
+  const button = event.target.closest(".color-choice");
+  if (!button) {
+    return;
+  }
+  const key = button.dataset.key;
+
+  const { error } = await db
+    .from("profiles")
+    .update({ bottle_color: key })
+    .eq("id", currentUser.id);
+
+  if (error) {
+    alert("色を変えられませんでした：" + error.message);
+    return;
+  }
+
+  myBottleColor = key;
+  renderCustomize();
+  renderBottle();
+});
+
+// マイページ → カスタム
+customizeOpen.addEventListener("click", function () {
+  mypageArea.hidden = true;
+  customizeArea.hidden = false;
+  renderCustomize();
+  window.scrollTo(0, 0);
+});
+
+// カスタム → マイページにもどる
+customizeBack.addEventListener("click", function () {
+  customizeArea.hidden = true;
+  mypageArea.hidden = false;
+  loadMyPage();
+  window.scrollTo(0, 0);
+});
 
 // ⚙️ → 設定
 settingsOpen.addEventListener("click", function () {

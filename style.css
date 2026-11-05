@@ -1117,3 +1117,72 @@ ul {
     color: #7A5A5F;
     padding-top: 4px;
 }
+
+/* ボトルをカスタム */
+.customize-button {
+    align-self: flex-start;
+    margin-top: 4px;
+    border: none;
+    border-radius: 14px;
+    padding: 6px 12px;
+    background: #B5574A;
+    color: #FFFFFF;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#customizeArea {
+    text-align: left;
+}
+
+#customizeArea h2 {
+    color: #3D2A2E;
+    margin: 0 0 8px;
+}
+
+.customize-preview {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+}
+
+.customize-label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.color-choices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.color-choice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid #FFF1F3;
+    border-radius: 14px;
+    background: #FFF1F3;
+    color: #3D2A2E;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.color-choice.selected {
+    border-color: #B5574A;
+    background: #FFFFFF;
+}
+
+.color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.customize-note {
+    font-size: 12px;
+    color: #7A5A5F;
+}
