@@ -2400,3 +2400,47 @@ h3,
     text-overflow: ellipsis;
     cursor: pointer;
 }
+
+/* タイムライン：アイコン・名前・日付の行 */
+.wish-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.wish-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--card-bg);
+}
+
+.wish-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 名前は、リストの文字と同じ色・大きさ */
+.wish-author {
+    font-size: 13px;
+    color: #3D2A2E;
+}
+
+.wish-meta {
+    font-size: 11px;
+    color: #AAAAAA;
+}
+
+/* 長押ししたときに、スマホのメニューや文字選択が出ないように */
+.like-button,
+.rewish-button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}

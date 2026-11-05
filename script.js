@@ -2644,7 +2644,7 @@ async function loadWishes() {
 
   const { data: profiles, error: error2 } = await db
     .from("profiles")
-    .select("id, nickname");
+    .select("id, nickname, avatar_url");
 
   const { data: friendRows, error: error3 } = await db
     .from("friendships")
@@ -2667,6 +2667,16 @@ async function loadWishes() {
       return profile.nickname;
     }
     return "だれか";
+  }
+
+    function avatarOf(userId) {
+    const profile = profiles.find(function (p) {
+      return p.id === userId;
+    });
+    if (profile) {
+      return profile.avatar_url;
+    }
+    return null;
   }
 
   // 表示する投稿を選ぶ
@@ -2773,11 +2783,13 @@ async function loadWishes() {
     const rewishedByMe = rewishUsers.includes(currentUser.id);
 
     // ボタンを押したときのために、情報をとっておく
-    wishData[wish.id] = {
+      wishData[wish.id] = {
       wish: wish,
       isMine: isMine,
       likedByMe: likedByMe,
       rewishedByMe: rewishedByMe,
+      likePeople: peopleText(likeUsers),
+      rewishPeople: peopleText(rewishUsers),
     };
 
     const li = document.createElement("li");
@@ -2787,24 +2799,42 @@ async function loadWishes() {
       li.classList.add("wish-done");
     }
 
-    // 誰の投稿か
-    const who = document.createElement("div");
-    who.className = "wish-name";
-    who.textContent = nicknameOf(wish.user_id) + " ・ " + formatDate(wish.created_at);
-    li.appendChild(who);
+    // アイコン・名前・日付・時間・（リウィッシュ元）を1行に
+    const head = document.createElement("div");
+    head.className = "wish-head";
 
-    // リウィッシュした投稿なら、元の人の名前
+    // アイコン（なければ、うすい色の丸）
+    const icon = document.createElement("span");
+    icon.className = "wish-icon";
+    const iconUrl = avatarOf(wish.user_id);
+    if (iconUrl) {
+      const img = document.createElement("img");
+      img.src = iconUrl;
+      img.alt = "";
+      icon.appendChild(img);
+    }
+
+    // 名前
+    const author = document.createElement("span");
+    author.className = "wish-author";
+    author.textContent = nicknameOf(wish.user_id);
+
+    // 日付・時間・リウィッシュの文
+    const meta = document.createElement("span");
+    meta.className = "wish-meta";
+    let metaText = formatDate(wish.created_at) + " " + formatTime(wish.created_at);
     if (wish.rewish_of) {
       const original = originals.find(function (o) {
         return o.id === wish.rewish_of;
       });
       if (original) {
-        const from = document.createElement("div");
-        from.className = "wish-rewish";
-        from.textContent = "⇄" + nicknameOf(original.user_id) + " さんのやりたいことをリウィッシュ";
-        li.appendChild(from);
+        metaText = metaText + " ・ ⇄ " + nicknameOf(original.user_id) + " さんから";
       }
     }
+    meta.textContent = metaText;
+
+    head.append(icon, author, meta);
+    li.appendChild(head);
 
     // 本文
     const body = document.createElement("div");
@@ -2860,20 +2890,6 @@ async function loadWishes() {
 
     li.appendChild(actions);
 
-    // 押した人の名前
-    if (likeUsers.length > 0) {
-      const likePeople = document.createElement("div");
-      likePeople.className = "wish-people";
-      likePeople.textContent = "♥ " + peopleText(likeUsers);
-      li.appendChild(likePeople);
-    }
-    if (rewishUsers.length > 0) {
-      const rewishPeople = document.createElement("div");
-      rewishPeople.className = "wish-people";
-      rewishPeople.textContent = "⇄" + peopleText(rewishUsers);
-      li.appendChild(rewishPeople);
-    }
-
     wishList.appendChild(li);
   });
 
@@ -2888,8 +2904,48 @@ async function loadWishes() {
   }
 }
 
+// ♡・⇄ を長押し → だれがしたかの一覧
+let pressTimer = null;
+let longPressed = false;
+
+wishList.addEventListener("pointerdown", function (event) {
+  const button = event.target.closest(".like-button, .rewish-button");
+  if (!button) {
+    return;
+  }
+  longPressed = false;
+
+  // 0.5秒おしつづけたら「長押し」
+  pressTimer = setTimeout(function () {
+    longPressed = true;
+    const li = button.closest("li");
+    const info = wishData[Number(li.dataset.id)];
+    if (!info) {
+      return;
+    }
+    if (button.classList.contains("like-button")) {
+      alert(info.likePeople ? "♥ " + info.likePeople : "まだいいねはないよ");
+    } else {
+      alert(info.rewishPeople ? "⇄ " + info.rewishPeople : "まだリウィッシュはないよ");
+    }
+  }, 500);
+});
+
+// 指をはなした・スクロールした → 長押しをやめる
+function cancelPress() {
+  clearTimeout(pressTimer);
+}
+wishList.addEventListener("pointerup", cancelPress);
+wishList.addEventListener("pointercancel", cancelPress);
+
 // タイムラインのボタン（削除・達成・いいね・リウィッシュ）
 wishList.addEventListener("click", async function (event) {
+    // 長押しのあとは、いいね・リウィッシュをしない
+  if (longPressed) {
+    longPressed = false;
+    return;
+  }
+  
   const li = event.target.closest("li");
   if (!li) {
     return;
