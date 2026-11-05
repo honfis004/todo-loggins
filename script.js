@@ -235,9 +235,7 @@ async function checkProfile() {
         // ニックネームはあるけど、色がまだ
         showBottleChoice();
     } else if (data) {
-          } else if (data) {
-        myBottleColor = data.bottle_color;
-
+         myBottleColor = data.bottle_color;
         showApp(data.nickname);
     } else {
         nicknameArea.hidden = false;
@@ -1044,12 +1042,6 @@ friendsTab.addEventListener("click", function () {
 everyoneTab.addEventListener("click", function () {
   setViewMode("everyone");
 });
-mineTab.addEventListener("click", function () {
-  setViewMode("mine");
-});
-everyoneTab.addEventListener("click", function () {
-  setViewMode("everyone");
-  });
 mineTab.addEventListener("click", function () {
   setViewMode("mine");
 });
