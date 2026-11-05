@@ -233,6 +233,15 @@ let groupWishData = {}; // グループのやりたいことごとの情報
 let toastTimer = null;
 const LEVELS = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
+const calPrev = document.getElementById("calPrev");
+const calNext = document.getElementById("calNext");
+const calTitle = document.getElementById("calTitle");
+const calGrid = document.getElementById("calGrid");
+
+// カレンダーで見ている月（その月の1日）
+let calMonth = new Date();
+calMonth.setDate(1);
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -1671,6 +1680,113 @@ async function loadPastBottles() {
   return fullDays;
 }
 
+// カレンダーを描く
+async function loadCalendar() {
+  const year = calMonth.getFullYear();
+  const month = calMonth.getMonth(); // 0が1月、11が12月
+  const first = new Date(year, month, 1);     // その月の1日
+  const last = new Date(year, month + 1, 0);  // その月の最後の日
+  const today = toDateString(new Date());
+
+  calTitle.textContent = year + "年" + (month + 1) + "月";
+
+  // その月の自分のタスク
+  const { data: rows } = await db
+    .from("tasks")
+    .select("id, task_date, done, completed_at")
+    .eq("user_id", currentUser.id)
+    .gte("task_date", toDateString(first))
+    .lte("task_date", toDateString(last));
+
+  // 日付ごとに分ける
+  const days = {};
+  (rows || []).forEach(function (row) {
+    if (!days[row.task_date]) {
+      days[row.task_date] = [];
+    }
+    days[row.task_date].push(row);
+  });
+
+  // 達成したタスクの写真
+  const doneIds = (rows || [])
+    .filter(function (t) {
+      return t.done;
+    })
+    .map(function (t) {
+      return t.id;
+    });
+  const photos = await getPhotos(doneIds);
+
+  calGrid.innerHTML = "";
+
+  // 1日が何曜日かに合わせて、前に空のマスを入れる
+  for (let i = 0; i < first.getDay(); i++) {
+    const blank = document.createElement("div");
+    blank.className = "cal-cell empty";
+    calGrid.appendChild(blank);
+  }
+
+  // 1日〜最後の日までのマス
+  for (let day = 1; day <= last.getDate(); day++) {
+    const date = toDateString(new Date(year, month, day));
+    const dayTasks = days[date] || [];
+
+    const cell = document.createElement("button");
+    cell.className = "cal-cell";
+
+    // 写真があれば、最初に達成した写真を背景に
+    const photoTask = dayTasks
+      .filter(function (t) {
+        return t.done && photos[t.id];
+      })
+      .sort(byCompletedAt)[0];
+
+    if (photoTask) {
+      cell.classList.add("has-photo");
+      cell.style.backgroundImage = 'url("' + photos[photoTask.id].url + '")';
+    } else if (dayTasks.length > 0) {
+      cell.classList.add("has-list");
+    }
+
+    // 満タンの日
+    const isFull = dayTasks.length > 0 && dayTasks.every(function (t) {
+      return t.done;
+    });
+    if (isFull) {
+      cell.classList.add("full");
+    }
+
+    if (date === today) {
+      cell.classList.add("today");
+    }
+
+    const number = document.createElement("span");
+    number.textContent = day;
+    cell.appendChild(number);
+
+    // タップ → その日の自分のリストへ
+    cell.addEventListener("click", function () {
+      changeDate(date);
+      showSection("daily");
+      homeView.hidden = true;
+      mineView.hidden = false;
+    });
+
+    calGrid.appendChild(cell);
+  }
+}
+
+// 前の月・次の月
+calPrev.addEventListener("click", function () {
+  calMonth.setMonth(calMonth.getMonth() - 1);
+  loadCalendar();
+});
+
+calNext.addEventListener("click", function () {
+  calMonth.setMonth(calMonth.getMonth() + 1);
+  loadCalendar();
+});
+
 // マイページを読み込む
 async function loadMyPage() {
   // 今日の自分のボトル
@@ -1692,6 +1808,7 @@ async function loadMyPage() {
   if (code) {
     myCodeText.textContent = code;
   }
+    loadCalendar();
 }
 
 // 選んでいる色を、ページ全体の CSS変数に入れる

@@ -1654,3 +1654,91 @@ h2 {
     font-size: 11px;
     color: #7A5A5F;
 }
+
+/* カレンダー */
+.calendar-card {
+    margin-top: 16px;
+    padding: 12px;
+    border-radius: 18px;
+    background: var(--card-bg);
+    text-align: left;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.cal-nav {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: none;
+    font-size: 20px;
+    color: #8a4a40;
+    cursor: pointer;
+}
+
+.calendar-week,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-week span {
+    padding: 4px 0;
+    text-align: center;
+    font-size: 11px;
+    color: #7A5A5F;
+}
+
+/* 1日分のマス */
+.cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 3px 4px;
+    border: none;
+    border-radius: 8px;
+    background-color: #FFFFFF;
+    background-size: cover;
+    background-position: center;
+    font: inherit;
+    font-size: 11px;
+    color: #3D2A2E;
+    cursor: pointer;
+}
+
+/* 月のはじまりより前の、空のマス */
+.cal-cell.empty {
+    background: none;
+    cursor: default;
+}
+
+/* リストを書いた日 */
+.cal-cell.has-list {
+    background-color: #FDE6EA;
+}
+
+/* 写真がある日は、日付の数字を白く */
+.cal-cell.has-photo span {
+    color: #FFFFFF;
+    font-weight: 700;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+}
+
+/* 満タンの日は、金色に光る */
+.cal-cell.full {
+    box-shadow: 0 0 0 2px #FFC450, 0 0 8px rgba(255, 196, 80, 0.8);
+}
+
+/* 今日 */
+.cal-cell.today {
+    outline: 2px solid #B5574A;
+    outline-offset: -2px;
+}
