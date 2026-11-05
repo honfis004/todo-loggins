@@ -633,3 +633,98 @@ ul {
     border-radius: 20px;
     padding: 14px 16px;
 }
+
+/* ホームの日付 */
+.home-date {
+    font-size: 15px;
+    font-weight: 700;
+    color: #7A5A5F;
+    text-align: left;
+}
+
+/* 自分のボトルのカード */
+.my-bottle-card {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 26px;
+    background: #FFF1F3;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.my-bottle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.my-bottle-info strong {
+    font-size: 17px;
+}
+
+/* ボトルの形 */
+.bottle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.bottle-cap {
+    width: 32px;
+    height: 19px;
+    background: #C96A5D;
+    clip-path: polygon(28% 0, 72% 0, 100% 42%, 78% 100%, 22% 100%, 0 42%);
+}
+
+.bottle-collar {
+    width: 24px;
+    height: 5px;
+    border-radius: 2px;
+    background: #D9B26F;
+}
+
+.bottle-neck {
+    width: 18px;
+    height: 8px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    border: 3px solid var(--line);
+    border-top: none;
+    border-bottom: none;
+}
+
+.bottle-body {
+    width: 96px;
+    height: 112px;
+    box-sizing: border-box;
+    border: 3px solid var(--line);
+    border-bottom-width: 8px;
+    border-radius: 46px 46px 18px 18px / 32px 32px 18px 18px;
+    background: var(--glass);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.bottle-layer {
+    flex-shrink: 0;
+    transition: height 0.4s;
+}
+
+.back-button {
+    border: none;
+    background: none;
+    color: #8a4a40;
+    font-size: 15px;
+    min-height: 44px;
+    cursor: pointer;
+}

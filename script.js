@@ -94,6 +94,26 @@ const bottleChoices = document.getElementById("bottleChoices");
 const bottleButton = document.getElementById("bottleButton");
 const mypageTab = document.getElementById("mypageTab");
 const mypageArea = document.getElementById("mypageArea");
+const homeView = document.getElementById("homeView");
+const mineView = document.getElementById("mineView");
+const homeDate = document.getElementById("homeDate");
+const myBottleCard = document.getElementById("myBottleCard");
+const myBottleBody = document.getElementById("myBottleBody");
+const myBottleCount = document.getElementById("myBottleCount");
+const myBottlePending = document.getElementById("myBottlePending");
+const backHome = document.getElementById("backHome");
+
+// カテゴリーごとの液体の色
+const CATEGORY_COLORS = {
+    "勉強": "#F6BFCB",
+    "趣味": "#D3C2F4",
+    "バイト": "#F8DCA6",
+    "家事": "#BFE6CC",
+    "運動": "#B3DBF6",
+    "その他": "#EADCCB"
+};
+
+let myBottleColor = "rose";
 
 // ボトルの色の一覧（key は保存する名前、line は線の色、glass はガラスの色）
 const BOTTLE_COLORS = [
@@ -138,6 +158,7 @@ function toDateString(d) {
 // 今選んでいる日付（最初は今日）
 let selectedDate = toDateString(new Date());
 dateInput.value = selectedDate;
+homeDate.textContent = formatHomeDate(selectedDate);
 
 // URLに招待コードがあれば、一時的に覚えておく
 const params = new URLSearchParams(window.location.search);
@@ -214,6 +235,9 @@ async function checkProfile() {
         // ニックネームはあるけど、色がまだ
         showBottleChoice();
     } else if (data) {
+          } else if (data) {
+        myBottleColor = data.bottle_color;
+
         showApp(data.nickname);
     } else {
         nicknameArea.hidden = false;
@@ -399,7 +423,84 @@ function render() {
 
     tasklist.appendChild(li);
   });
+
+    renderBottle();
 }
+
+// 自分のボトルを描く
+function renderBottle() {
+    // 自分のボトルの色を CSS 変数に入れる
+    const color = BOTTLE_COLORS.find(function (c) {
+        return c.key === myBottleColor;
+    });
+    if (color) {
+        myBottleCard.style.setProperty("--line", color.line);
+        myBottleCard.style.setProperty("--glass", color.glass);
+    }
+
+    // 達成したタスク（達成した順）
+    const doneTasks = tasks
+        .filter(function (t) {
+            return t.done;
+        })
+        .sort(byCompletedAt);
+
+    // 液体の層をつくる（タスク1つ分の高さ = 全体 ÷ タスクの数）
+    myBottleBody.innerHTML = "";
+    doneTasks.forEach(function (task) {
+        const layer = document.createElement("div");
+        layer.className = "bottle-layer";
+        layer.style.height = 100 / tasks.length + "%";
+        layer.style.background = CATEGORY_COLORS[task.category];
+        myBottleBody.appendChild(layer);
+    });
+
+    // 達成の数
+    if (tasks.length === 0) {
+        myBottleCount.textContent = "まだリストがないよ";
+    } else {
+        const percent = Math.round((doneTasks.length * 100) / tasks.length);
+        myBottleCount.textContent =
+            doneTasks.length + " / " + tasks.length + " 達成 ・ " + percent + "%";
+    }
+
+    // まだのタスクを2つまで
+    myBottlePending.innerHTML = "";
+    tasks
+        .filter(function (t) {
+            return !t.done;
+        })
+        .slice(0, 2)
+        .forEach(function (task) {
+            const line = document.createElement("div");
+            line.textContent = "・【" + task.category + "】" + task.text;
+            myBottlePending.appendChild(line);
+        });
+}
+
+// 日付を「11月5日（木）」の形にする
+function formatHomeDate(dateString) {
+    const d = new Date(dateString + "T00:00:00");
+    const days = ["日", "月", "火", "水", "木", "金", "土"];
+    return (d.getMonth() + 1) + "月" + d.getDate() + "日（" + days[d.getDay()] + "）";
+}
+
+// ホーム ⇔ 自分のリスト
+function showHome() {
+    homeView.hidden = false;
+    mineView.hidden = true;
+    window.scrollTo(0, 0);
+}
+
+myBottleCard.addEventListener("click", function () {
+    homeView.hidden = true;
+    mineView.hidden = false;
+    window.scrollTo(0, 0);
+});
+
+backHome.addEventListener("click", function () {
+    showHome();
+});
 
 //追加ボタン
 addButton.addEventListener("click", async function() {
@@ -840,6 +941,7 @@ function stopRealtime() {
 function changeDate(newDate) {
     selectedDate = newDate;
     dateInput.value = selectedDate;
+    homeDate.textContent = formatHomeDate(selectedDate);
     loadTasks();
     loadEveryone();
 }
@@ -966,6 +1068,9 @@ function showSection(name) {
   groupTab.classList.toggle("active", name === "group");
   mypageTab.classList.toggle("active", name === "mypage");
 
+  if (name === "daily") {
+    showHome();
+  }
   if (name === "wish") {
     loadWishes();
   }
