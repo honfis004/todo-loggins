@@ -1186,3 +1186,62 @@ ul {
     font-size: 12px;
     color: #7A5A5F;
 }
+
+/* テーマカラー（最初の色） */
+:root {
+    --page-bg: #FFFFFF;
+    --card-bg: #FFF1F3;
+}
+
+body {
+    background-color: var(--page-bg);
+}
+
+/* まとまりの枠は、全部この色にする */
+.my-bottle-card,
+.profile-card,
+.settings-card,
+#everyoneArea .person,
+.gear-button,
+.color-choice,
+.shelf-label span {
+    background: var(--card-bg);
+}
+
+/* テーマカラーの設定 */
+.theme-card {
+    padding: 12px 14px;
+    gap: 8px;
+}
+
+.settings-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.settings-sub {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #7A5A5F;
+}
+
+.theme-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.theme-choice {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 18px;
+    border: 2px solid #F3C3BB;
+    font-size: 12px;
+    color: #3D2A2E;
+    cursor: pointer;
+}
+
+.theme-choice.selected {
+    border-color: #B5574A;
+}

@@ -142,11 +142,33 @@ const customizeArea = document.getElementById("customizeArea");
 const customizeBack = document.getElementById("customizeBack");
 const customizePreview = document.getElementById("customizePreview");
 const colorChoices = document.getElementById("colorChoices");
+const bgChoices = document.getElementById("bgChoices");
+const cardChoices = document.getElementById("cardChoices");
 
+// 背景の色
+const PAGE_COLORS = [
+  { key: "white", name: "しろ", color: "#FFFFFF" },
+  { key: "pink", name: "ピンク", color: "#FDE6EA" },
+  { key: "lavender", name: "ラベンダー", color: "#EFE9FB" },
+  { key: "mint", name: "ミント", color: "#E7F5EE" },
+  { key: "cream", name: "クリーム", color: "#FFF6E3" }
+];
+
+// まとまりの枠の色
+const CARD_COLORS = [
+  { key: "pink", name: "ピンク", color: "#FFF1F3" },
+  { key: "lavender", name: "ラベンダー", color: "#F3EFFC" },
+  { key: "mint", name: "ミント", color: "#ECF7F1" },
+  { key: "cream", name: "クリーム", color: "#FFF7E8" },
+  { key: "white", name: "しろ", color: "#FFFFFF" }
+];
+
+let themeBg = "white";
+let themeCard = "pink";
 let chosenBottle = null;
 let tasks = [];    
 let currentUser  = null;
-let channel = null;
+let channel =ckpro null;
 let viewMode = "friends"; // "friends" か "everyone"
 let groups = [];
 let currentGroupId = null;
@@ -253,7 +275,11 @@ async function checkProfile() {
         // ニックネームはあるけど、色がまだ
         showBottleChoice();
     } else if (data) {
-         myBottleColor = data.bottle_color;
+        myBottleColor = data.bottle_color;
+        themeBg = data.theme_bg || "white";
+        themeCard = data.theme_card || "pink";
+        applyTheme();
+        showApp(data.nickname);
         showApp(data.nickname);
     } else {
         nicknameArea.hidden = false;
@@ -1370,6 +1396,76 @@ async function loadMyPage() {
   }
 }
 
+// 選んでいる色を、ページ全体の CSS変数に入れる
+function applyTheme() {
+  const bg = PAGE_COLORS.find(function (c) {
+    return c.key === themeBg;
+  });
+  const card = CARD_COLORS.find(function (c) {
+    return c.key === themeCard;
+  });
+  if (bg) {
+    document.documentElement.style.setProperty("--page-bg", bg.color);
+  }
+  if (card) {
+    document.documentElement.style.setProperty("--card-bg", card.color);
+  }
+}
+
+// 色のボタンを並べる（list：色の一覧、selectedKey：選んでいる色、area：入れる場所）
+function makeThemeButtons(list, selectedKey, area) {
+  area.innerHTML = "";
+  list.forEach(function (c) {
+    const button = document.createElement("button");
+    button.className = "theme-choice";
+    button.dataset.key = c.key;
+    button.textContent = c.name;
+    button.style.background = c.color;
+    if (c.key === selectedKey) {
+      button.classList.add("selected");
+    }
+    area.appendChild(button);
+  });
+}
+
+function renderThemeChoices() {
+  makeThemeButtons(PAGE_COLORS, themeBg, bgChoices);
+  makeThemeButtons(CARD_COLORS, themeCard, cardChoices);
+}
+
+// 色をタップ → 保存して、すぐ反映（column は "theme_bg" か "theme_card"）
+async function pickTheme(event, column) {
+  const button = event.target.closest(".theme-choice");
+  if (!button) {
+    return;
+  }
+  const key = button.dataset.key;
+
+  const change = {};
+  change[column] = key;
+  const { error } = await db.from("profiles").update(change).eq("id", currentUser.id);
+  if (error) {
+    alert("色を変えられませんでした：" + error.message);
+    return;
+  }
+
+  if (column === "theme_bg") {
+    themeBg = key;
+  } else {
+    themeCard = key;
+  }
+  applyTheme();
+  renderThemeChoices();
+}
+
+bgChoices.addEventListener("click", function (event) {
+  pickTheme(event, "theme_bg");
+});
+
+cardChoices.addEventListener("click", function (event) {
+  pickTheme(event, "theme_card");
+});
+
 // カスタムの画面を描く
 function renderCustomize() {
   // 見本のボトル（今日の液体入り）
@@ -1441,6 +1537,7 @@ customizeBack.addEventListener("click", function () {
 settingsOpen.addEventListener("click", function () {
   mypageArea.hidden = true;
   settingsArea.hidden = false;
+  renderThemeChoices();
   window.scrollTo(0, 0);
 });
 
