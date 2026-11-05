@@ -2858,7 +2858,7 @@ h3,
     opacity: 1;
 }
 
-.liquid-box.blended .task.liquid {
+#tasklist .liquid-box.blended .task.liquid {
     background: transparent;
 }
 
