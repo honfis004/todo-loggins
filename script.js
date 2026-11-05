@@ -247,6 +247,13 @@ const groupTitle = document.getElementById("groupTitle");
 const groupCreateBox = document.getElementById("groupCreateBox");
 const groupCreateToggle = document.getElementById("groupCreateToggle");
 
+const avatarInput = document.getElementById("avatarInput");
+const myAvatar = document.getElementById("myAvatar");
+const myAvatarEmpty = document.getElementById("myAvatarEmpty");
+const friendAvatar = document.getElementById("friendAvatar");
+
+let myAvatarUrl = null;
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -339,7 +346,8 @@ async function checkProfile() {
         themeBg = data.theme_bg || "white";
         themeCard = data.theme_card || "pink";
         decoTheme = data.deco_theme || "cute";
-         myDeco = decoOf(data);
+        myDeco = decoOf(data);
+        myAvatarUrl = data.avatar_url;
         applyTheme();
         showApp(data.nickname);
     } else {
@@ -746,7 +754,7 @@ tasklist.addEventListener("click", async function (event) {
 async function loadEveryone() {
   const { data: profiles, error: error1 } = await db
     .from("profiles")
-    .select("id, nickname, bottle_color, deco_cap, deco_necklace, deco_lame, deco_charm, deco_lace");
+    .select("id, nickname, bottle_color, avatar_url,  deco_cap, deco_necklace, deco_lame, deco_charm, deco_lace");
 
   const { data: allTasks, error: error2 } = await db
     .from("tasks")
@@ -1239,6 +1247,12 @@ async function openFriendPage(profile) {
   window.scrollTo(0, 0);
 
   friendName.textContent = profile.nickname;
+    if (profile.avatar_url) {
+    friendAvatar.src = profile.avatar_url;
+    friendAvatar.hidden = false;
+  } else {
+    friendAvatar.hidden = true;
+  }
 
   // その日のタスク
   const { data: todayTasks } = await db
@@ -1792,8 +1806,77 @@ calNext.addEventListener("click", function () {
   loadCalendar();
 });
 
+// 自分のアイコンを出す（なければ「＋」）
+function showMyAvatar() {
+  if (myAvatarUrl) {
+    myAvatar.src = myAvatarUrl;
+    myAvatar.hidden = false;
+    myAvatarEmpty.hidden = true;
+  } else {
+    myAvatar.hidden = true;
+    myAvatarEmpty.hidden = false;
+  }
+}
+
+// 選んだ写真の真ん中を、正方形に切り抜いて小さくする
+function cropSquare(file) {
+  return new Promise(function (resolve, reject) {
+    const img = new Image();
+    img.onload = function () {
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 256;
+      canvas
+        .getContext("2d")
+        .drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, 256, 256);
+      URL.revokeObjectURL(img.src);
+      canvas.toBlob(resolve, "image/jpeg", 0.85);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// 写真を選んだら → 切り抜いて保存して、プロフィールに入れる
+avatarInput.addEventListener("change", async function () {
+  const file = avatarInput.files[0];
+  if (!file) {
+    return;
+  }
+
+  const blob = await cropSquare(file);
+  const path = currentUser.id + "/avatar.jpg";
+
+  const { error: uploadError } = await db.storage
+    .from("avatars")
+    .upload(path, blob, { contentType: "image/jpeg", upsert: true });
+  if (uploadError) {
+    alert("アイコンを保存できませんでした：" + uploadError.message);
+    return;
+  }
+
+  // 公開アドレス（最後に時刻を付けて、新しい写真がすぐ出るようにする）
+  const { data } = db.storage.from("avatars").getPublicUrl(path);
+  const url = data.publicUrl + "?v=" + Date.now();
+
+  const { error } = await db
+    .from("profiles")
+    .update({ avatar_url: url })
+    .eq("id", currentUser.id);
+  if (error) {
+    alert("アイコンを設定できませんでした：" + error.message);
+    return;
+  }
+
+  myAvatarUrl = url;
+  showMyAvatar();
+  avatarInput.value = "";
+});
+
 // マイページを読み込む
 async function loadMyPage() {
+    showMyAvatar();
   // 今日の自分のボトル
   myPageBottle.innerHTML = "";
   myPageBottle.appendChild(makeSmallBottle(myBottleColor, tasks, myDeco));
@@ -2533,12 +2616,12 @@ async function loadWishes() {
     const rewishButton = document.createElement("button");
     rewishButton.className = "rewish-button";
     if (isMine) {
-      rewishButton.textContent = "🔁 " + rewishUsers.length;
+      rewishButton.textContent = "⇄" + rewishUsers.length;
     } else if (rewishedByMe) {
       rewishButton.classList.add("rewished");
-      rewishButton.textContent = "🔁 リウィッシュ済み " + rewishUsers.length;
+      rewishButton.textContent = "⇄ Rewished " + rewishUsers.length;
     } else {
-      rewishButton.textContent = "🔁 リウィッシュ " + rewishUsers.length;
+      rewishButton.textContent = "⇄ Rewish " + rewishUsers.length;
     }
     actions.appendChild(rewishButton);
 
