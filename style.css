@@ -2217,3 +2217,186 @@ h2 {
 #wishList .delete-button:hover {
     color: #D9776B;
 }
+
+/* ---------- ホームの自分のカード ---------- */
+.my-bottle-card {
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* ボトル（タップで今日の写真） */
+.my-bottle-button {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.my-bottle-info {
+    min-width: 0;
+    padding-right: 40px;
+}
+
+/* まだのタスク（白丸つき） */
+.home-pending {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.home-pending li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    font-size: 13px;
+}
+
+.home-check {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 2px solid #E8A79C;
+    border-radius: 50%;
+    background: #FFFFFF;
+    cursor: pointer;
+}
+
+.home-more {
+    font-size: 12px;
+    color: #7A5A5F;
+}
+
+/* カードの中の＋ボタン */
+.home-add {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: #B5574A;
+    color: #FFFFFF;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(181, 87, 74, 0.35);
+    cursor: pointer;
+}
+
+/* ホームのボトルの小さい波 */
+.mini-wave {
+    flex-shrink: 0;
+    height: 6px;
+    margin-bottom: -1px;
+    overflow: hidden;
+}
+
+.mini-wave svg {
+    display: block;
+    width: 200%;
+    height: 6px;
+    animation: wave 3s linear infinite;
+}
+
+/* ホームの自分のボトルの中に、アイコンをうっすら */
+#myBottleBody {
+    isolation: isolate;
+}
+
+#myBottleBody::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--avatar, none);
+    background-size: cover;
+    background-position: center;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+/* ---------- フォント ---------- */
+
+/* 英字は Kaisei Decol、日本語はしっぽり明朝 */
+body,
+button,
+input,
+select {
+    font-family: "Kaisei Decol", "Shippori Mincho", serif;
+    font-weight: 500;
+}
+
+/* 大きめに出る字は太字に */
+h1,
+h2,
+h3,
+.home-date,
+.profile-info strong,
+.my-bottle-info strong,
+.group-title,
+.calendar-header,
+.settings-title,
+.section-title,
+.deco-theme strong {
+    font-weight: 700;
+}
+
+/* ロゴ（dropIn） */
+#appTitle {
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* ホーム：今日もらったリアクション */
+.home-reactions {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+}
+
+.home-reactions-label {
+    font-size: 11px;
+    color: #7A5A5F;
+}
+
+/* フレンドの棚：名前のプレートを付ける板 */
+.shelf-board.name-board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    height: auto;
+    padding: 4px 0;
+}
+
+/* 名前のプレート */
+.shelf-plate {
+    justify-self: center;
+    max-width: 88%;
+    box-sizing: border-box;
+    padding: 1px 8px;
+    border: 1px solid #D9B26F;
+    border-radius: 4px;
+    background: #FFF8EE;
+    box-shadow: 0 1px 2px rgba(120, 70, 50, 0.25);
+    color: #5E3B2E;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}

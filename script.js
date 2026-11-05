@@ -258,6 +258,16 @@ const openAddSheet = document.getElementById("openAddSheet");
 const addSheet = document.getElementById("addSheet");
 const addCancel = document.getElementById("addCancel");
 
+const myBottleButton = document.getElementById("myBottleButton");
+const homeAddButton = document.getElementById("homeAddButton");
+
+// 自分のボトルの液体の透明度（FF=くっきり、80=半分すき通る）
+const LIQUID_ALPHA = "B3";
+
+const myReactions = document.getElementById("myReactions");
+
+let todayReactions = []; // 今日もらったリアクション（どのタスクかの情報つき）
+
 function toDateString(d) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -518,7 +528,7 @@ function render() {
 
   // まだ → 達成 の順に並べる
   pending.concat(done).forEach(function (task) {
-        // 液体のいちばん上の層の前に、波を入れる
+    // 液体のいちばん上の層の前に、波を入れる
     if (task === done[0]) {
       const wave = document.createElement("li");
       wave.className = "liquid-wave";
@@ -526,9 +536,10 @@ function render() {
         '<svg viewBox="0 0 680 16" preserveAspectRatio="none">' +
         '<path d="M0 8 Q 42.5 0 85 8 T 170 8 T 255 8 T 340 8 T 425 8 T 510 8 T 595 8 T 680 8 V16 H0 Z"></path>' +
         "</svg>";
-      wave.querySelector("path").setAttribute("fill", CATEGORY_COLORS[task.category]);
+      wave.querySelector("path").setAttribute("fill", CATEGORY_COLORS[task.category] + LIQUID_ALPHA);
       tasklist.appendChild(wave);
     }
+
     const li = document.createElement("li");
     li.className = "task";
     li.dataset.id = task.id;
@@ -538,13 +549,10 @@ function render() {
       text = "🗝 " + text;
     }
 
-    // 達成したものは、カテゴリーの色の液体にする
+    // 達成したものは、カテゴリーの色の液体にする（すき通る）
     if (task.done) {
       li.classList.add("done", "liquid");
-      li.style.background = CATEGORY_COLORS[task.category];
-      if (task === done[0]) {
-        li.classList.add("liquid-top");
-      }
+      li.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
       // 左：達成の証拠（写真か💧）
       li.appendChild(makeProof(task.photo, text));
     }
@@ -584,6 +592,13 @@ function renderBottle() {
         dailyArea.style.setProperty("--glass", color.glass);
     }
 
+    // ボトルの中にうっすら出すアイコン
+    if (myAvatarUrl) {
+        dailyArea.style.setProperty("--avatar", 'url("' + myAvatarUrl + '")');
+    } else {
+        dailyArea.style.removeProperty("--avatar");
+    }
+
     // 達成したタスク（達成した順）
     const doneTasks = tasks
         .filter(function (t) {
@@ -591,15 +606,28 @@ function renderBottle() {
         })
         .sort(byCompletedAt);
 
-    // 液体の層をつくる（タスク1つ分の高さ = 全体 ÷ タスクの数）
+    // 液体の層をつくる（すき通る色）
     myBottleBody.innerHTML = "";
     doneTasks.forEach(function (task) {
         const layer = document.createElement("div");
         layer.className = "bottle-layer";
         layer.style.height = 100 / tasks.length + "%";
-        layer.style.background = CATEGORY_COLORS[task.category];
+        layer.style.background = CATEGORY_COLORS[task.category] + LIQUID_ALPHA;
         myBottleBody.appendChild(layer);
     });
+
+    // いちばん上の層に、小さい波
+    if (doneTasks.length > 0) {
+        const top = doneTasks[doneTasks.length - 1];
+        const wave = document.createElement("div");
+        wave.className = "mini-wave";
+        wave.innerHTML =
+            '<svg viewBox="0 0 680 16" preserveAspectRatio="none">' +
+            '<path d="M0 8 Q 42.5 0 85 8 T 170 8 T 255 8 T 340 8 T 425 8 T 510 8 T 595 8 T 680 8 V16 H0 Z"></path>' +
+            "</svg>";
+        wave.querySelector("path").setAttribute("fill", CATEGORY_COLORS[top.category] + LIQUID_ALPHA);
+        myBottleBody.appendChild(wave);
+    }
 
     // 達成の数
     if (tasks.length === 0) {
@@ -610,18 +638,56 @@ function renderBottle() {
             doneTasks.length + " / " + tasks.length + " 達成 ・ " + percent + "%";
     }
 
-    // まだのタスクを2つまで
+    // まだのタスク（白丸を押すと達成）を3つまで
     myBottlePending.innerHTML = "";
-    tasks
-        .filter(function (t) {
-            return !t.done;
-        })
-        .slice(0, 2)
-        .forEach(function (task) {
-            const line = document.createElement("div");
-            line.textContent = "・【" + task.category + "】" + task.text;
-            myBottlePending.appendChild(line);
+    const pendingTasks = tasks.filter(function (t) {
+        return !t.done;
+    });
+    pendingTasks.slice(0, 3).forEach(function (task) {
+        const li = document.createElement("li");
+
+        const check = document.createElement("button");
+        check.className = "home-check";
+        check.setAttribute("aria-label", "達成にする");
+        check.addEventListener("click", function () {
+            openDoneMenu(task); // 撮って達成・撮らずに達成を選ぶ
         });
+
+        const text = document.createElement("span");
+        text.textContent = "【" + task.category + "】" + task.text;
+
+        li.append(check, text);
+        myBottlePending.appendChild(li);
+    });
+    if (pendingTasks.length > 3) {
+        const more = document.createElement("li");
+        more.className = "home-more";
+        more.textContent = "ほか " + (pendingTasks.length - 3) + " こ";
+        myBottlePending.appendChild(more);
+    }
+
+        // 今日もらったリアクションを、まとめて丸く並べる
+    todayReactions = [];
+    tasks.forEach(function (task) {
+        (task.reactions || []).forEach(function (r) {
+            todayReactions.push(
+                Object.assign({}, r, { taskText: "【" + task.category + "】" + task.text })
+            );
+        });
+    });
+
+    myReactions.innerHTML = "";
+    if (todayReactions.length === 0) {
+        myReactions.hidden = true;
+    } else {
+        myReactions.hidden = false;
+        const label = document.createElement("span");
+        label.className = "home-reactions-label";
+        label.textContent = "もらったリアクション";
+        myReactions.append(makeReactionBubbles(todayReactions), label);
+    }
+
+    // かざり
     applyDecorations(myBottleCard.querySelector(".bottle"), myDeco);
     applyDecorations(document.querySelector(".big-bottle"), myDeco);
 }
@@ -642,10 +708,38 @@ function showHome() {
   window.scrollTo(0, 0);
 }
 
-myBottleCard.addEventListener("click", function () {
+// カードのボタン以外のところ → 自分のボトルの画面へ
+myBottleCard.addEventListener("click", function (event) {
+    if (event.target.closest("button")) {
+        return; // ボトル・白丸・＋は、それぞれの処理にまかせる
+    }
     homeView.hidden = true;
     mineView.hidden = false;
     window.scrollTo(0, 0);
+});
+
+// ボトル → 今日の写真
+myBottleButton.addEventListener("click", function () {
+    const photos = myViewerPhotos();
+    if (photos.length === 0) {
+        showToast("今日の写真はまだないよ。撮って達成してみよう！");
+        return;
+    }
+    openViewer(photos, 0);
+});
+
+// カードの＋ → やることを追加
+homeAddButton.addEventListener("click", function () {
+    addSheet.hidden = false;
+    taskinput.focus();
+});
+
+// もらったリアクション → だれから・どのタスクに・何が届いたか
+myReactions.addEventListener("click", function () {
+    const lines = todayReactions.map(function (r) {
+        return r.name + "：" + reactionIcon(r) + "　" + r.taskText;
+    });
+    alert(lines.join("\n"));
 });
 
 backHome.addEventListener("click", function () {
@@ -846,18 +940,23 @@ tasklist.addEventListener("click", async function (event) {
     return;
   }
 
-  // 達成済み → 未達成に戻す
+   // 達成済み → 未達成に戻す（毎回確認する）
   if (task.done) {
+    let message = "未達成に戻しますか？";
     if (task.photo) {
-      if (!confirm("未達成に戻すと、写真も消えます。いいですか？")) {
-        return;
-      }
+      message = "未達成に戻すと、写真も消えます。いいですか？";
+    }
+    if (!confirm(message)) {
+      return;
+    }
+    if (task.photo) {
       await db.storage.from("task-photos").remove([task.photo.path]);
       await db.from("task_photos").delete().eq("task_id", id);
     }
     setDone(id, false);
     return;
   }
+
 
   // まだのタスク → 達成のしかたを選ぶ
   openDoneMenu(task);
@@ -1276,20 +1375,14 @@ function renderShelf(items, unlocked, photos) {
     const bottles = document.createElement("div");
     bottles.className = "shelf-row-bottles";
     const board = document.createElement("div");
-    board.className = "shelf-board";
+    board.className = "shelf-board name-board"; // 名前のプレートを付ける板
     const labels = document.createElement("div");
     labels.className = "shelf-row-labels";
 
     rowItems.forEach(function (item) {
+      // 棚の上：ボトル
       const friend = document.createElement("div");
       friend.className = "shelf-friend";
-
-      const name = document.createElement("span");
-      name.className = "shelf-name";
-      name.textContent = item.profile.nickname;
-            name.addEventListener("click", function () {
-        openFriendPage(item.profile);
-      });
 
       const button = document.createElement("button");
       button.className = "shelf-bottle";
@@ -1318,10 +1411,19 @@ function renderShelf(items, unlocked, photos) {
         openViewer(toViewerPhotos(list, item.profile.nickname, photos), 0);
       });
 
-      friend.append(name, button);
+      friend.appendChild(button);
       bottles.appendChild(friend);
 
-      // 棚の下の小さい札
+      // 棚の板：名前のプレート（タップでフレンドのマイページ）
+      const plate = document.createElement("span");
+      plate.className = "shelf-name shelf-plate";
+      plate.textContent = item.profile.nickname;
+      plate.addEventListener("click", function () {
+        openFriendPage(item.profile);
+      });
+      board.appendChild(plate);
+
+      // 棚の下：達成数
       const label = document.createElement("div");
       label.className = "shelf-label";
       const tag = document.createElement("span");
@@ -1984,6 +2086,7 @@ avatarInput.addEventListener("change", async function () {
 
   myAvatarUrl = url;
   showMyAvatar();
+  renderBottle();
   avatarInput.value = "";
 });
 
