@@ -172,6 +172,25 @@ const friendStats = document.getElementById("friendStats");
 const friendTodayList = document.getElementById("friendTodayList");
 const friendWishList = document.getElementById("friendWishList");
 const friendPhotos = document.getElementById("friendPhotos");
+const collectionOpen = document.getElementById("collectionOpen");
+const collectionArea = document.getElementById("collectionArea");
+const collectionBack = document.getElementById("collectionBack");
+const themeTabs = document.getElementById("themeTabs");
+const chooseThemeButton = document.getElementById("chooseThemeButton");
+const collectionList = document.getElementById("collectionList");
+
+// かざりのテーマ
+const DECO_THEMES = [
+  { key: "cute", name: "かわいい", desc: "リボンやハート" },
+  { key: "cool", name: "かっこいい", desc: "メタルやチェーン" },
+  { key: "natural", name: "ナチュラル", desc: "葉っぱや木の実" }
+];
+const STEPS = [5, 15, 30];
+
+let decorations = []; // かざりの一覧
+let ownedIds = [];    // 持っているかざりのID
+let decoTheme = "cute"; // 今のテーマ
+let viewTheme = "cute"; // 「かざりを集める」で見ているテーマ
 
 let themeBg = "white";
 let themeCard = "pink";
@@ -289,6 +308,7 @@ async function checkProfile() {
         myBottleColor = data.bottle_color;
         themeBg = data.theme_bg || "white";
         themeCard = data.theme_card || "pink";
+        decoTheme = data.deco_theme || "cute";
         applyTheme();
         showApp(data.nickname);
     } else {
@@ -303,6 +323,7 @@ function showApp(nickname) {
     appArea.hidden = false;
     appTitle.hidden = true;
     userInfo.textContent = nickname;
+    loadDecorations();
     loadTasks();
     loadEveryone();
     startRealtime();
@@ -1700,6 +1721,205 @@ customizeBack.addEventListener("click", function () {
   window.scrollTo(0, 0);
 });
 
+// かざりの一覧を読みこむ
+async function loadDecorations() {
+  const { data } = await db.from("decorations").select("*");
+  decorations = data || [];
+}
+
+// 持っているかざりを読みこむ
+async function loadOwned() {
+  const { data } = await db.from("owned_decorations").select("decoration_id");
+  ownedIds = (data || []).map(function (row) {
+    return row.decoration_id;
+  });
+}
+
+// もらえるかざりがあれば、もらう（データベースの関数が数えてくれる）
+async function claimDecorations() {
+  const { data, error } = await db.rpc("claim_decorations");
+  if (error || !data || data.length === 0) {
+    return;
+  }
+  const names = data.map(function (id) {
+    const d = decorations.find(function (x) {
+      return x.id === id;
+    });
+    if (d) {
+      return d.name;
+    }
+    return id;
+  });
+  showToast("✨ 新しいかざり「" + names.join("」「") + "」をゲット！");
+}
+
+// 「かざりを集める」を開く
+async function openCollection() {
+  customizeArea.hidden = true;
+  collectionArea.hidden = false;
+  viewTheme = decoTheme;
+  window.scrollTo(0, 0);
+  await claimDecorations();
+  await loadOwned();
+  await renderCollection();
+}
+
+// 「かざりを集める」を描く
+async function renderCollection() {
+  // テーマのボタン
+  themeTabs.innerHTML = "";
+  DECO_THEMES.forEach(function (t) {
+    const button = document.createElement("button");
+    button.className = "deco-theme";
+    button.dataset.key = t.key;
+    if (t.key === viewTheme) {
+      button.classList.add("selected");
+    }
+    const name = document.createElement("strong");
+    name.textContent = t.name;
+    const desc = document.createElement("span");
+    if (t.key === decoTheme) {
+      desc.textContent = "いまのテーマ";
+    } else {
+      desc.textContent = t.desc;
+    }
+    button.append(name, desc);
+    themeTabs.appendChild(button);
+  });
+
+  // 今と違うテーマを見ているときだけ「このテーマで集める」
+  const theme = DECO_THEMES.find(function (t) {
+    return t.key === viewTheme;
+  });
+  chooseThemeButton.hidden = viewTheme === decoTheme;
+  chooseThemeButton.textContent = "「" + theme.name + "」で集める";
+
+  // 見ているテーマで、カテゴリーごとに何回達成したか
+  const { data: rows } = await db
+    .from("tasks")
+    .select("category")
+    .eq("user_id", currentUser.id)
+    .eq("done", true)
+    .eq("done_theme", viewTheme);
+  const counts = {};
+  (rows || []).forEach(function (row) {
+    counts[row.category] = (counts[row.category] || 0) + 1;
+  });
+
+  // カテゴリーごとのカード
+  collectionList.innerHTML = "";
+  Object.keys(CATEGORY_COLORS).forEach(function (category) {
+    const count = counts[category] || 0;
+    const next = STEPS.find(function (s) {
+      return count < s;
+    });
+    const passed = STEPS.filter(function (s) {
+      return count >= s;
+    });
+    let prev = 0;
+    if (passed.length > 0) {
+      prev = passed[passed.length - 1];
+    }
+    let progress = 100;
+    if (next) {
+      progress = Math.round(((count - prev) * 100) / (next - prev));
+    }
+
+    const card = document.createElement("div");
+    card.className = "deco-card";
+
+    // 上の行（色の丸・カテゴリー・回数）
+    const head = document.createElement("div");
+    head.className = "deco-head";
+    const dot = document.createElement("span");
+    dot.className = "deco-dot";
+    dot.style.background = CATEGORY_COLORS[category];
+    const name = document.createElement("span");
+    name.textContent = category;
+    const countText = document.createElement("span");
+    countText.className = "deco-count";
+    if (next) {
+      countText.textContent = count + "回 ・ つぎまであと" + (next - count) + "回";
+    } else {
+      countText.textContent = count + "回 ・ ぜんぶ集めた！";
+    }
+    head.append(dot, name, countText);
+
+    // 進み具合のバー
+    const bar = document.createElement("div");
+    bar.className = "deco-bar";
+    const fill = document.createElement("div");
+    fill.className = "deco-bar-fill";
+    fill.style.width = progress + "%";
+    bar.appendChild(fill);
+
+    // かざり（持っているものは色付き）
+    const items = document.createElement("div");
+    items.className = "deco-items";
+    decorations
+      .filter(function (d) {
+        return d.theme === viewTheme && d.category === category;
+      })
+      .sort(function (a, b) {
+        return a.step - b.step;
+      })
+      .forEach(function (d) {
+        const chip = document.createElement("span");
+        chip.className = "deco-chip";
+        if (ownedIds.includes(d.id)) {
+          chip.classList.add("owned");
+          chip.style.background = CATEGORY_COLORS[category];
+          chip.textContent = d.name;
+        } else {
+          chip.textContent = d.name + "（" + d.step + "回）";
+        }
+        items.appendChild(chip);
+      });
+
+    card.append(head, bar, items);
+    collectionList.appendChild(card);
+  });
+}
+
+// テーマのボタン → そのテーマのかざりを見る
+themeTabs.addEventListener("click", function (event) {
+  const button = event.target.closest(".deco-theme");
+  if (!button) {
+    return;
+  }
+  viewTheme = button.dataset.key;
+  renderCollection();
+});
+
+// 「このテーマで集める」
+chooseThemeButton.addEventListener("click", async function () {
+  const { error } = await db
+    .from("profiles")
+    .update({ deco_theme: viewTheme })
+    .eq("id", currentUser.id);
+  if (error) {
+    alert("テーマを変えられませんでした：" + error.message);
+    return;
+  }
+  decoTheme = viewTheme;
+  const theme = DECO_THEMES.find(function (t) {
+    return t.key === decoTheme;
+  });
+  showToast("これからは「" + theme.name + "」のかざりが集まるよ！");
+  renderCollection();
+});
+
+collectionOpen.addEventListener("click", function () {
+  openCollection();
+});
+
+collectionBack.addEventListener("click", function () {
+  collectionArea.hidden = true;
+  customizeArea.hidden = false;
+  renderCustomize();
+  window.scrollTo(0, 0);
+});
+
 // ⚙️ → 設定
 settingsOpen.addEventListener("click", function () {
   mypageArea.hidden = true;
@@ -1724,6 +1944,7 @@ openNotificationSettings.addEventListener("click", function () {
 
 // 下のメニューの切り替え
 function showSection(name) {
+  collectionArea.hidden = true;
   settingsArea.hidden = true;
   customizeArea.hidden = true;
   dailyArea.hidden = name !== "daily";
@@ -2552,6 +2773,9 @@ async function setDone(id, done) {
     return;
   }
   loadTasks();
+    if (done) {
+    claimDecorations();
+  }
 }
 
 // 達成の証拠（写真があれば写真、なければ💧）を作る
